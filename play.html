@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Play · Ransomware Tabletop</title>
+  <meta name="description" content="Play a ransomware incident-response tabletop exercise in your browser.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Play · Ransomware Tabletop">
+  <meta property="og:description" content="Make the calls in a ransomware incident, from the first ransom note to lessons learned.">
+  <meta property="og:url" content="https://agdenton3.github.io/ransomware-tabletop/play.html">
+  <meta name="theme-color" content="#500000">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/ui/play.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html"><img class="mark" src="assets/favicon.svg" alt=""> Ransomware&nbsp;<em>Tabletop</em></a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="play.html" aria-current="page">Play</a>
+        <a href="learn.html">Learn</a>
+        <button class="theme-toggle" type="button">Dark mode</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Shown when no scenario is chosen -->
+    <section class="wrap section" id="picker-view" hidden aria-labelledby="picker-title">
+      <p class="eyebrow">Play</p>
+      <h1 id="picker-title">Choose a <em>scenario</em></h1>
+      <div class="grid grid-2" id="scenario-list"><p class="muted">Loading scenarios…</p></div>
+    </section>
+
+    <div id="error" class="wrap section" hidden></div>
+
+    <!-- The war room -->
+    <div id="game" hidden>
+      <div class="warroom-top" role="region" aria-label="Clock and meters">
+        <div class="wrap">
+          <div class="top-left">
+            <p class="scenario-name" id="scn-name"></p>
+            <span class="clock" id="clock"></span>
+          </div>
+          <div class="meters" id="meters" role="group" aria-label="Meters"></div>
+        </div>
+      </div>
+
+      <div class="wrap warroom">
+        <section class="inbox-col" aria-labelledby="inbox-title">
+          <h2 class="panel-title" id="inbox-title">Inbox</h2>
+          <div class="inbox" id="inbox"></div>
+        </section>
+
+        <section class="stage" aria-labelledby="node-title">
+          <div class="card" id="stage-card">
+            <p class="eyebrow" id="node-eyebrow"></p>
+            <h2 id="node-title" tabindex="-1"></h2>
+            <div class="narrative" id="narrative"></div>
+            <div id="choices-area"></div>
+          </div>
+          <div id="debug" hidden></div>
+        </section>
+
+        <aside class="side" aria-label="Situation">
+          <section class="card board" aria-labelledby="board-title">
+            <h2 class="panel-title" id="board-title">Situation board</h2>
+            <dl id="board"></dl>
+          </section>
+          <section class="card" aria-label="Organization profile">
+            <details class="org" id="org">
+              <summary>Org profile</summary>
+              <dl id="org-dl"></dl>
+            </details>
+          </section>
+          <section class="card no-print">
+            <h2 class="panel-title">Controls</h2>
+            <p class="muted" style="font-size:.9rem">Press <kbd>1</kbd>–<kbd>4</kbd> to choose. Progress saves automatically in this browser.</p>
+            <button class="btn btn-ghost" type="button" id="restart">Restart scenario</button>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <div class="sr-only" aria-live="polite" aria-atomic="true" id="live"></div>
+
+  <dialog class="splash" id="splash" aria-labelledby="note-title" aria-describedby="note-text">
+    <div class="note">
+      <span class="sim-label">SIMULATION · FICTIONAL ATTACKER</span>
+      <p class="gang" id="note-gang"></p>
+      <h2 id="note-title">YOUR FILES ARE ENCRYPTED</h2>
+      <p id="note-text"></p>
+      <p class="demand" id="note-demand"></p>
+      <p class="countdown" id="note-countdown" aria-hidden="true"></p>
+      <p class="sr-only" id="note-deadline"></p>
+      <div class="btn-row" id="note-actions"></div>
+    </div>
+  </dialog>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="credit">Amy Denton · CSCE 477 · Texas A&amp;M · Dr. Kumar</p>
+      <p class="disclaimer"><strong>Disclaimer:</strong> This is an educational simulation, not legal advice. All organizations, people, ransomware groups, domains and phone numbers are fictional, and in-game costs are illustrative. Real laws and guidance are cited to primary sources on the <a href="learn.html#references">Learn page</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,135 @@
+{
+  "id": "_sample",
+  "title": "Sample: Corner Print Shop",
+  "orgType": "Small business",
+  "difficulty": "Intro",
+  "estMinutes": 2,
+  "startTime": "07:42",
+  "orgProfile": {
+    "name": "Corner Print Shop (fictional)",
+    "size": "6 staff",
+    "description": "A small print and copy shop. Used only for tests and as a format example.",
+    "criticalSystems": ["Order system", "File server"],
+    "backups": "A USB drive, rotated weekly and kept off-site.",
+    "insurance": "None",
+    "regulatedData": ["Customer contact details"]
+  },
+  "ransomNote": {
+    "gang": "Sample Group",
+    "demand": "$5,000 in cryptocurrency",
+    "deadlineHours": 48,
+    "text": "Your files are encrypted. This is a sample note for testing."
+  },
+  "startingMeters": { "cost": 0, "downtime": 0, "dataLoss": 0, "trust": 70, "legal": 10 },
+  "hiddenFacts": {
+    "backupsIntact": {
+      "value": true,
+      "label": "The off-site USB backup was not connected and is intact",
+      "preparation": { "measure": "Keep an offline backup and test restoring it", "csf": "PR", "detail": "An offline copy cannot be encrypted by malware on the network." }
+    }
+  },
+  "start": "start",
+  "board": {
+    "items": [
+      { "label": "Backup status", "states": [ { "if": { "checkedBackups": true, "backupsIntact": true }, "text": "Off-site copy intact", "tone": "good" } ], "default": "Unknown" }
+    ],
+    "notifications": [ { "flag": "toldOwner", "label": "Owner" } ]
+  },
+  "nodes": {
+    "start": {
+      "title": "The order system won't open",
+      "clockAdvance": 0,
+      "inbox": [ { "from": "Front counter", "channel": "text", "body": "Every file on the server ends in .lock now. There's a note." } ],
+      "narrative": "A ransom note is on the shared drive. The shop opens in eighteen minutes.",
+      "choices": [
+        {
+          "id": "isolate", "label": "Unplug the server and the counter PCs from the network", "hint": "Stops the spread. Orders are on paper today.",
+          "csf": "RS", "legacyPhase": "Containment, Eradication & Recovery", "keyDecision": true,
+          "effects": { "downtime": 4, "cost": 500 }, "setFlags": { "isolated": true, "toldOwner": true }, "next": "scope",
+          "debrief": { "whyItMatters": "Isolation limits how far the ransomware spreads.", "betterPractice": "Isolate affected systems first, then investigate.", "referenceIds": ["cisa-stopransomware-guide"] }
+        },
+        {
+          "id": "keep_running", "label": "Keep taking orders while you look into it", "hint": "No lost sales this morning.",
+          "csf": "RS", "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": { "dataLoss": 20 }, "next": "scope",
+          "debrief": { "whyItMatters": "Encryption keeps spreading while systems stay connected.", "betterPractice": "Contain first.", "referenceIds": ["cisa-stopransomware-guide"] }
+        }
+      ]
+    },
+    "scope": {
+      "title": "What do we still have?",
+      "clockAdvance": 2,
+      "narrative": "You need to know whether you can restore.",
+      "choices": [
+        {
+          "id": "check_backups", "label": "Check the off-site USB backup", "hint": "Takes an hour to fetch it.",
+          "csf": "ID", "legacyPhase": "Detection & Analysis", "keyDecision": true,
+          "effects": { "downtime": 1 }, "setFlags": { "checkedBackups": true },
+          "next": [ { "if": { "backupsIntact": true }, "next": "backups_good" }, { "else": "backups_bad" } ],
+          "debrief": { "whyItMatters": "Knowing your backup status decides every later option.", "betterPractice": "Verify backups before negotiating.", "referenceIds": ["cisa-stopransomware-guide"] }
+        },
+        {
+          "id": "skip_check", "label": "Assume the backups are gone and go straight to options", "hint": "Saves an hour.",
+          "csf": "RS", "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": { "legal": 5 }, "next": "backups_bad",
+          "debrief": { "whyItMatters": "Assumptions push you toward paying.", "betterPractice": "Check before deciding.", "referenceIds": ["nist-sp800-61r3"] }
+        }
+      ]
+    },
+    "backups_good": {
+      "title": "The backup is clean",
+      "clockAdvance": 1,
+      "narrative": "The USB drive has last week's files.",
+      "choices": [
+        {
+          "id": "restore", "label": "Wipe and restore from the backup", "hint": "Lose a few days of orders.",
+          "csf": "RC", "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": { "downtime": 20, "cost": 2000, "dataLoss": 5 }, "next": "end_restore",
+          "debrief": { "whyItMatters": "Restoring from a clean backup avoids paying.", "betterPractice": "Rebuild clean, then restore.", "referenceIds": ["cisa-stopransomware-guide"] }
+        }
+      ]
+    },
+    "backups_bad": {
+      "title": "No backup in hand",
+      "clockAdvance": 1,
+      "narrative": "Without a backup the options narrow.",
+      "choices": [
+        {
+          "id": "pay", "label": "Pay the ransom", "hint": "Might get files back fast.",
+          "csf": "GV", "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": { "cost": 5000, "legal": 20, "trust": -10 }, "next": "end_pay",
+          "debrief": { "whyItMatters": "Payment carries sanctions risk and no guarantee.", "betterPractice": "Consult law enforcement first.", "referenceIds": ["ofac-ransomware-advisory-2021", "fbi-ic3-ransomware"] }
+        },
+        {
+          "id": "rebuild", "label": "Rebuild from scratch", "hint": "Slow, but clean.", "requires": { "isolated": true },
+          "csf": "RC", "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": { "downtime": 60, "dataLoss": 30 }, "next": "end_restore",
+          "debrief": { "whyItMatters": "Rebuilding is slow without backups.", "betterPractice": "Keep offline backups.", "referenceIds": ["cisa-stopransomware-guide"] }
+        }
+      ]
+    },
+    "end_restore": {
+      "title": "Back in business",
+      "clockAdvance": 24,
+      "narrative": "The shop reopens.",
+      "ending": true,
+      "outcome": "Restored without paying",
+      "summary": "You recovered from your own backups."
+    },
+    "end_pay": {
+      "title": "Paid and waiting",
+      "clockAdvance": 24,
+      "narrative": "The decryptor arrives and works on most files.",
+      "ending": true,
+      "outcome": "Paid the ransom",
+      "summary": "You paid, and recovered most files."
+    }
+  },
+  "injects": [
+    {
+      "id": "spread", "atHour": 3, "if": { "isolated": false },
+      "message": { "from": "Front counter", "channel": "text", "body": "The laptop at the counter just got the note too." },
+      "effects": { "dataLoss": 10, "trust": -5 }, "setFlags": { "spreadToLaptop": true }
+    }
+  ]
+}

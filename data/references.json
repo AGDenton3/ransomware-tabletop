@@ -1,0 +1,135 @@
+{
+  "nist-sp800-61r3": {
+    "title": "SP 800-61 Rev. 3: Incident Response Recommendations and Considerations for Cybersecurity Risk Management: A CSF 2.0 Community Profile",
+    "publisher": "National Institute of Standards and Technology (NIST)",
+    "year": 2025,
+    "url": "https://csrc.nist.gov/pubs/sp/800/61/r3/final",
+    "note": "Published April 2025. Supersedes SP 800-61 Rev. 2 and organizes incident response around the six CSF 2.0 Functions."
+  },
+  "nist-sp800-61r2": {
+    "title": "SP 800-61 Rev. 2: Computer Security Incident Handling Guide (withdrawn)",
+    "publisher": "National Institute of Standards and Technology (NIST)",
+    "year": 2012,
+    "url": "https://csrc.nist.gov/pubs/sp/800/61/r2/final",
+    "note": "Source of the legacy four-phase lifecycle: Preparation; Detection & Analysis; Containment, Eradication & Recovery; Post-Incident Activity."
+  },
+  "nist-csf2": {
+    "title": "The NIST Cybersecurity Framework (CSF) 2.0 (NIST CSWP 29)",
+    "publisher": "National Institute of Standards and Technology (NIST)",
+    "year": 2024,
+    "url": "https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.29.pdf",
+    "note": "Six Functions: Govern, Identify, Protect, Detect, Respond, Recover. Govern was added in 2.0."
+  },
+  "cisa-stopransomware-guide": {
+    "title": "#StopRansomware Guide",
+    "publisher": "CISA, FBI, NSA and MS-ISAC (Joint Ransomware Task Force)",
+    "year": 2023,
+    "url": "https://www.cisa.gov/stopransomware/ransomware-guide",
+    "note": "Joint prevention and response checklist, updated October 2023. Recommends offline, encrypted, tested backups; MFA on remote access; isolating affected systems; and reporting to CISA or the FBI."
+  },
+  "cisa-cpg": {
+    "title": "Cross-Sector Cybersecurity Performance Goals (CPGs)",
+    "publisher": "Cybersecurity and Infrastructure Security Agency (CISA)",
+    "year": 2023,
+    "url": "https://www.cisa.gov/cross-sector-cybersecurity-performance-goals",
+    "note": "Baseline practices, including MFA, asset inventory, tested backups and an incident response plan. The #StopRansomware Guide maps its recommendations to these goals."
+  },
+  "ofac-ransomware-advisory-2021": {
+    "title": "Updated Advisory on Potential Sanctions Risks for Facilitating Ransomware Payments",
+    "publisher": "U.S. Department of the Treasury, Office of Foreign Assets Control (OFAC)",
+    "year": 2021,
+    "url": "https://ofac.treasury.gov/media/912981/download",
+    "note": "September 21, 2021. States that the U.S. government strongly discourages paying ransoms; sanctions violations can bring civil penalties on a strict-liability basis; prompt reporting to and cooperation with law enforcement are mitigating factors."
+  },
+  "fbi-ic3-ransomware": {
+    "title": "Ransomware (IC3 crime information page)",
+    "publisher": "Federal Bureau of Investigation, Internet Crime Complaint Center (IC3)",
+    "year": 2024,
+    "url": "https://www.ic3.gov/CrimeInfo/Ransomware",
+    "note": "The FBI does not support paying a ransom, since paying does not guarantee data recovery. It asks victims to report whether or not they pay."
+  },
+  "fbi-ic3-2024-report": {
+    "title": "Internet Crime Report 2024",
+    "publisher": "Federal Bureau of Investigation, Internet Crime Complaint Center (IC3)",
+    "year": 2025,
+    "url": "https://www.ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf",
+    "note": "Press summaries report ransomware as the most-reported threat among critical-infrastructure complainants (about 1,400 complaints, up 9% from 2023). [VERIFY: confirm exact figures against the PDF before quoting on a slide.]"
+  },
+  "hhs-breach-notification-rule": {
+    "title": "Breach Notification Rule",
+    "publisher": "U.S. Department of Health & Human Services (HHS)",
+    "year": 2009,
+    "url": "https://www.hhs.gov/hipaa/for-professionals/breach-notification/index.html",
+    "note": "Covered entities notify affected individuals without unreasonable delay and no later than 60 days after discovery. Breaches of 500+ individuals are also reported to HHS within 60 days."
+  },
+  "ecfr-45-164-subpart-d": {
+    "title": "45 CFR Part 164, Subpart D: Notification in the Case of Breach of Unsecured Protected Health Information (§§ 164.400–164.414)",
+    "publisher": "Electronic Code of Federal Regulations (eCFR)",
+    "year": 2024,
+    "url": "https://www.ecfr.gov/current/title-45/subtitle-A/subchapter-C/part-164/subpart-D",
+    "note": "§ 164.404 individual notice; § 164.406 media notice when more than 500 residents of a State or jurisdiction are affected; § 164.408 notice to the HHS Secretary."
+  },
+  "hhs-ransomware-fact-sheet": {
+    "title": "Fact Sheet: Ransomware and HIPAA",
+    "publisher": "HHS Office for Civil Rights (OCR)",
+    "year": 2016,
+    "url": "https://www.hhs.gov/hipaa/for-professionals/security/guidance/cybersecurity/ransomware-fact-sheet/index.html",
+    "note": "When ransomware encrypts ePHI, a breach is presumed unless the entity can show a low probability that the PHI was compromised, based on a risk assessment."
+  },
+  "hhs-change-healthcare-faq": {
+    "title": "Change Healthcare Cybersecurity Incident Frequently Asked Questions",
+    "publisher": "HHS Office for Civil Rights (OCR)",
+    "year": 2024,
+    "url": "https://www.hhs.gov/hipaa/for-professionals/special-topics/change-healthcare-cybersecurity-incident-frequently-asked-questions/index.html",
+    "note": "A real-world parallel: OCR investigated the February 2024 ransomware attack on Change Healthcare, which disrupted claims and pharmacy processing nationwide. [VERIFY: press reports say a ransom was paid and the stolen data was still used for a second extortion attempt; confirm in a primary source such as congressional testimony before citing.]"
+  },
+  "tx-bcc-521-053": {
+    "title": "Texas Business & Commerce Code § 521.053: Notification Required Following Breach of Security of Computerized Data",
+    "publisher": "Texas Legislature",
+    "year": 2023,
+    "url": "https://statutes.capitol.texas.gov/Docs/BC/htm/BC.521.htm",
+    "note": "Notify affected individuals without unreasonable delay and no later than 60 days after determining a breach occurred. If 250+ Texas residents are affected, notify the Texas Attorney General within 30 days, electronically (as amended effective Sept. 1, 2023)."
+  },
+  "tx-gov-2054-603": {
+    "title": "Texas Government Code § 2054.603: Security Incident Notification by State Agency or Local Government",
+    "publisher": "Texas Legislature / Texas Department of Information Resources (DIR)",
+    "year": 2023,
+    "url": "https://dir.texas.gov/sites/default/files/2024-03/Local%20Govt%20Incident%20Reporting%20User%20Guide%20V1.1.pdf",
+    "note": "Local governments must report a security incident, including the introduction of ransomware, to DIR within 48 hours of discovery (moved here by SB 271, effective Sept. 1, 2023)."
+  },
+  "cisa-aa21-131a": {
+    "title": "AA21-131A: DarkSide Ransomware: Best Practices for Preventing Business Disruption from Ransomware Attacks",
+    "publisher": "CISA and FBI",
+    "year": 2021,
+    "url": "https://www.cisa.gov/ncas/alerts/aa21-131a",
+    "note": "Issued after the Colonial Pipeline incident. Recommends robust IT/OT segmentation, identifying IT/OT dependencies, developing and regularly testing manual controls, and keeping OT operating at needed capacity even if IT is compromised."
+  },
+  "cisa-ot-primary-mitigations": {
+    "title": "Primary Mitigations to Reduce Cyber Threats to Operational Technology",
+    "publisher": "CISA, EPA, DOE, FBI",
+    "year": 2025,
+    "url": "https://www.cisa.gov/resources-tools/resources/primary-mitigations-reduce-cyber-threats-operational-technology",
+    "note": "Includes removing OT connections to the public internet, segmenting IT and OT, and practising the ability to revert to manual operations. [VERIFY: publication date]"
+  },
+  "wws-ir-guide": {
+    "title": "Water and Wastewater Sector Incident Response Guide",
+    "publisher": "CISA, FBI and EPA",
+    "year": 2024,
+    "url": "https://www.epa.gov/system/files/documents/2024-01/wws-sector_incident-response-guide.pdf",
+    "note": "January 2024. Describes the federal support available to water utilities at each stage of the incident response lifecycle and how to request it."
+  },
+  "cisa-water-vuln-scanning": {
+    "title": "CISA's Free Cyber Vulnerability Scanning for Water Utilities (fact sheet)",
+    "publisher": "CISA, EPA, Water Sector Coordinating Council, ASDWA",
+    "year": 2023,
+    "url": "https://www.cisa.gov/resources-tools/resources/cisas-free-cyber-vulnerability-scanning-water-utilities",
+    "note": "A no-cost service that scans internet-facing systems and sends weekly reports with recommended fixes."
+  },
+  "epa-cyberwater": {
+    "title": "Cybersecurity Planning for Water and Wastewater Utilities",
+    "publisher": "U.S. Environmental Protection Agency (EPA)",
+    "year": 2024,
+    "url": "https://www.epa.gov/cyberwater/cybersecurity-planning",
+    "note": "EPA resources, including the Cybersecurity Incident Action Checklist, an incident response plan template, and free cyber assessments for utilities."
+  }
+}

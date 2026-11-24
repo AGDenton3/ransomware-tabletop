@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ransomware Tabletop: an incident-response exercise</title>
+  <meta name="description" content="A browser-based, choose-your-path ransomware incident-response tabletop exercise mapped to NIST SP 800-61 Rev. 3 and CSF 2.0.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Ransomware Tabletop">
+  <meta property="og:description" content="It's 7:42 a.m. The screens say your files are encrypted. Make the calls, then see how your response maps to NIST.">
+  <meta property="og:url" content="https://agdenton3.github.io/ransomware-tabletop/">
+  <meta name="theme-color" content="#500000">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/ui/home.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html"><img class="mark" src="assets/favicon.svg" alt=""> Ransomware&nbsp;<em>Tabletop</em></a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html" aria-current="page">Home</a>
+        <a href="play.html">Play</a>
+        <a href="learn.html">Learn</a>
+        <button class="theme-toggle" type="button">Dark mode</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">CSCE 477 · Incident response exercise</p>
+        <h1>It's 7:42 a.m. The screens say your files are <em>encrypted</em>.</h1>
+        <p class="lede">You are the IT lead at a small organization with no security team, and a ransom note has just appeared. Every call you make costs money, time, data or trust, and the clock keeps moving whether you decide or not. At the end, a debrief maps each of your decisions to the NIST incident-response framework.</p>
+        <div class="btn-row">
+          <a class="btn" href="#scenarios">Choose a scenario</a>
+          <a class="btn btn-secondary" href="learn.html">How NIST frames incident response</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="how">
+      <div class="wrap">
+        <p class="eyebrow">How to play</p>
+        <h2 id="how">Four steps, about <em>fifteen minutes</em></h2>
+        <ol class="steps">
+          <li><strong>Pick an organization</strong>Each scenario has its own systems, backups, insurance and legal duties. Open the org profile any time.</li>
+          <li><strong>Read the inbox</strong>Emails, calls and texts arrive as the clock moves. Some bring facts; some bring pressure.</li>
+          <li><strong>Make the call</strong>Choose with the mouse or keys <kbd>1</kbd>–<kbd>4</kbd>. Watch the five meters: Cost, Downtime, Data Loss, Public Trust and Legal Exposure.</li>
+          <li><strong>Read the debrief</strong>See your grade, every decision tagged by NIST CSF 2.0 Function, what you missed, and what preparation would have changed.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" id="scenarios" aria-labelledby="pick" tabindex="-1">
+      <div class="wrap">
+        <p class="eyebrow">Scenarios</p>
+        <h2 id="pick">Choose your <em>morning</em></h2>
+        <div class="grid grid-2" id="scenario-list" aria-live="polite">
+          <p class="muted">Loading scenarios…</p>
+        </div>
+        <p class="muted" style="margin-top:1rem">Running a class session? Add presentation mode from any scenario card: large text, A/B/C/D choices for a show-of-hands vote, and a reveal step after each decision.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="credit">Amy Denton · CSCE 477 · Texas A&amp;M · Dr. Kumar</p>
+      <p class="disclaimer"><strong>Disclaimer:</strong> This is an educational simulation, not legal advice. All organizations, people, ransomware groups, domains and phone numbers are fictional, and in-game costs are illustrative. Real laws and guidance are cited to primary sources on the <a href="learn.html#references">Learn page</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>
