@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learn · Ransomware Tabletop</title>
+  <meta name="description" content="NIST SP 800-61 Rev. 3 and the CSF 2.0 Functions in plain language, the ransom-payment question, a pre-incident checklist, and every source the game cites.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Learn · Ransomware Tabletop">
+  <meta property="og:description" content="How NIST frames incident response, whether to pay, and what to do before an incident.">
+  <meta property="og:url" content="https://agdenton3.github.io/ransomware-tabletop/learn.html">
+  <meta name="theme-color" content="#500000">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/ui/learn.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html"><img class="mark" src="assets/favicon.svg" alt=""> Ransomware&nbsp;<em>Tabletop</em></a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="play.html">Play</a>
+        <a href="learn.html" aria-current="page">Learn</a>
+        <button class="theme-toggle" type="button">Dark mode</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Learn</p>
+        <h1>The framework behind the <em>game</em></h1>
+        <p class="lede">Every decision in the game is tagged with a NIST Cybersecurity Framework 2.0 Function, following NIST SP 800-61 Rev. 3. Here is what that means, how it differs from the older lifecycle, and the sources behind every real-world claim in the game.</p>
+        <nav aria-label="On this page" class="btn-row">
+          <a class="btn btn-ghost" href="#nist">NIST SP 800-61 Rev. 3</a>
+          <a class="btn btn-ghost" href="#rev2">Rev. 2 vs. Rev. 3</a>
+          <a class="btn btn-ghost" href="#pay">Should you pay?</a>
+          <a class="btn btn-ghost" href="#checklist">Before an incident</a>
+          <a class="btn btn-ghost" href="#references">References</a>
+        </nav>
+      </div>
+    </section>
+
+    <section class="section" id="nist" aria-labelledby="nist-title">
+      <div class="wrap stack">
+        <p class="eyebrow">NIST SP 800-61 Rev. 3 (April 2025)</p>
+        <h2 id="nist-title">Incident response as part of <em>managing risk</em></h2>
+        <p>NIST Special Publication 800-61 is the U.S. government's main guidance on incident response. Revision 3, published in April 2025, is written as a “Community Profile” of the NIST Cybersecurity Framework (CSF) 2.0. Instead of treating incident response as a separate checklist that starts when an alarm goes off, it describes incident response as part of an organization's everyday cybersecurity risk management, organized around the six CSF 2.0 Functions. <span class="refs-inline">[<a href="#ref-nist-sp800-61r3">NIST SP 800-61r3</a>; <a href="#ref-nist-csf2">NIST CSF 2.0</a>]</span></p>
+        <div class="table-scroll card">
+          <table class="data">
+            <caption class="sr-only">The six CSF 2.0 Functions and how they appear in the game</caption>
+            <thead><tr><th scope="col">Function</th><th scope="col">In plain language</th><th scope="col">Example decision in the game</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><span class="badge badge-GV"><span class="code">GV</span> Govern</span></th><td>Who decides, with what authority, policy and risk appetite. New in CSF 2.0.</td><td>Escalating to the practice owner or city manager; the council's vote on payment.</td></tr>
+              <tr><th scope="row"><span class="badge badge-ID"><span class="code">ID</span> Identify</span></th><td>Knowing your assets, risks and what is actually affected, and improving after incidents.</td><td>Checking every backup and test-restoring before deciding anything.</td></tr>
+              <tr><th scope="row"><span class="badge badge-PR"><span class="code">PR</span> Protect</span></th><td>Safeguards such as MFA, patching, segmentation and backups.</td><td>Resetting credentials and enforcing MFA; segmenting IT from OT.</td></tr>
+              <tr><th scope="row"><span class="badge badge-DE"><span class="code">DE</span> Detect</span></th><td>Finding and analyzing signs of compromise.</td><td>Forensic imaging and log analysis to learn how attackers got in.</td></tr>
+              <tr><th scope="row"><span class="badge badge-RS"><span class="code">RS</span> Respond</span></th><td>Containing, coordinating, communicating and reporting during the incident.</td><td>Isolating systems; calling the insurer, CISA or the FBI; public statements.</td></tr>
+              <tr><th scope="row"><span class="badge badge-RC"><span class="code">RC</span> Recover</span></th><td>Restoring operations and confirming systems are clean.</td><td>Priority-ordered restoration; testing a decryptor on copies.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="rev2" aria-labelledby="rev2-title" style="background:var(--surface)">
+      <div class="wrap stack">
+        <p class="eyebrow">What changed</p>
+        <h2 id="rev2-title">From a four-phase cycle to <em>six Functions</em></h2>
+        <p>Revision 2 (2012) described a four-phase incident response lifecycle. Many courses and playbooks still use it, so the game shows each decision's Rev. 2 phase as a secondary label. <span class="refs-inline">[<a href="#ref-nist-sp800-61r2">NIST SP 800-61r2</a>]</span></p>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Rev. 2 (2012): lifecycle</h3>
+            <ol class="ref-list">
+              <li>Preparation</li>
+              <li>Detection &amp; Analysis</li>
+              <li>Containment, Eradication &amp; Recovery</li>
+              <li>Post-Incident Activity, feeding back into Preparation</li>
+            </ol>
+          </div>
+          <div class="card">
+            <h3>Rev. 3 (2025): CSF 2.0 Functions</h3>
+            <ul class="ref-list">
+              <li><strong>Before an incident:</strong> Govern, Identify and Protect cover much of what Rev. 2 called Preparation.</li>
+              <li><strong>During an incident:</strong> Detect, Respond and Recover.</li>
+              <li><strong>Lessons learned:</strong> improvement runs through all the Functions continuously rather than coming only at the end.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout"><p class="callout-title">Why the change matters</p><p>Rev. 3 makes clear that how an incident goes is mostly decided before it starts: by governance, inventory and safeguards. That is the point of the game's “Preparation would have changed this” debrief section. <span class="refs-inline">[<a href="#ref-nist-sp800-61r3">NIST SP 800-61r3</a>]</span></p></div>
+      </div>
+    </section>
+
+    <section class="section" id="pay" aria-labelledby="pay-title">
+      <div class="wrap stack">
+        <p class="eyebrow">The hardest call</p>
+        <h2 id="pay-title">Should you <em>pay?</em></h2>
+        <p>The game doesn't give a verdict, and neither does this page. These are the considerations, each from a primary source. Decisions like this belong with leadership, counsel and law enforcement, not with the IT lead alone.</p>
+        <div class="grid grid-2">
+          <article class="card">
+            <h3>No guarantee of recovery</h3>
+            <p>The FBI says it does not support paying a ransom, partly because paying does not guarantee an organization will get its data back. <span class="refs-inline">[<a href="#ref-fbi-ic3-ransomware">FBI IC3</a>]</span> In the game, paid decryptors are slow and partial.</p>
+          </article>
+          <article class="card">
+            <h3>No guarantee of deletion</h3>
+            <p>With double extortion, attackers steal data before encrypting it. A “deletion log” from a criminal cannot be verified, and the notification duties for stolen data remain whether or not you pay. <span class="refs-inline">[<a href="#ref-hhs-ransomware-fact-sheet">HHS OCR</a>; <a href="#ref-tx-bcc-521-053">Tex. Bus. &amp; Com. Code § 521.053</a>]</span></p>
+          </article>
+          <article class="card">
+            <h3>Sanctions risk</h3>
+            <p>Treasury's Office of Foreign Assets Control (OFAC) warns that paying a sanctioned person or group can violate U.S. sanctions, and that penalties can be imposed on a strict-liability basis, even if you didn't know. The advisory states that the U.S. government strongly discourages paying. <span class="refs-inline">[<a href="#ref-ofac-ransomware-advisory-2021">OFAC 2021</a>]</span></p>
+          </article>
+          <article class="card">
+            <h3>Funding the next attack</h3>
+            <p>The FBI notes that payment may embolden attackers to target more organizations and fund further criminal activity. <span class="refs-inline">[<a href="#ref-fbi-ic3-ransomware">FBI IC3</a>]</span></p>
+          </article>
+          <article class="card">
+            <h3>Law enforcement wants to hear from you either way</h3>
+            <p>The FBI asks victims to report incidents whether or not they pay. OFAC treats prompt reporting to and cooperation with law enforcement as mitigating factors. <span class="refs-inline">[<a href="#ref-fbi-psa-2019-high-impact">FBI PSA 2019</a>; <a href="#ref-ofac-ransomware-advisory-2021">OFAC 2021</a>]</span></p>
+          </article>
+          <article class="card">
+            <h3>Why some organizations still consider it</h3>
+            <p>The FBI acknowledges that executives facing an inability to operate will evaluate all their options. For a hospital or utility, how long an outage lasts can be a safety issue, which is why tested backups and manual workarounds, decided in advance, matter so much. <span class="refs-inline">[<a href="#ref-fbi-psa-2019-high-impact">FBI PSA 2019</a>; <a href="#ref-cisa-stopransomware-guide">#StopRansomware Guide</a>]</span></p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="checklist" aria-labelledby="checklist-title" style="background:var(--surface)">
+      <div class="wrap stack">
+        <p class="eyebrow">Before an incident</p>
+        <h2 id="checklist-title">A checklist for <em>small organizations</em></h2>
+        <p class="muted">Tick off what your organization already has. Your ticks are saved only in this browser.</p>
+        <ul class="checklist" id="checklist-list"></ul>
+      </div>
+    </section>
+
+    <section class="section" id="references" aria-labelledby="refs-title" tabindex="-1">
+      <div class="wrap stack">
+        <p class="eyebrow">Sources</p>
+        <h2 id="refs-title"><em>References</em></h2>
+        <p class="muted">Every real-world law, regulation, guidance document or statistic in the game cites one of these primary sources. Items marked [VERIFY] still need checking against the original before being quoted.</p>
+        <ol class="ref-list" id="ref-list"><li class="muted">Loading references…</li></ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="credit">Amy Denton · CSCE 477 · Texas A&amp;M · Dr. Kumar</p>
+      <p class="disclaimer"><strong>Disclaimer:</strong> This is an educational simulation, not legal advice. All organizations, people, ransomware groups, domains and phone numbers are fictional, and in-game costs are illustrative. Real laws and guidance are cited to primary sources on the <a href="learn.html#references">Learn page</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>

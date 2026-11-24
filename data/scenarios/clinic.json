@@ -2235,7 +2235,7 @@
       "message": {
         "from": "Dana Whitfield, Brazos County Ledger",
         "channel": "text",
-        "body": "Hi, Dana from the Courier. Several patients say the clinic is closed and mention a hacking group's website. Can you call me back today?"
+        "body": "Hi, Dana from the County Ledger. Several patients say the clinic is closed and mention a hacking group's website. Can you call me back today?"
       },
       "effects": {
         "trust": -2

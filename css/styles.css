@@ -185,8 +185,9 @@ kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4p
 .meters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .6rem; }
 .meter { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: .5rem .65rem .55rem; position: relative; min-width: 0; }
 .meter-head { display: flex; justify-content: space-between; align-items: baseline; gap: .4rem; }
-.meter-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meter-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); line-height: 1.2; }
 .meter-value { font: 600 1.05rem var(--font-mono); white-space: nowrap; }
+.meter-label .short { display: none; }
 .meter-bar { height: .4rem; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin-top: .4rem; }
 .meter-fill { height: 100%; width: 0; background: var(--accent); border-radius: inherit; transition: width var(--dur) ease; }
 .meter[data-tone="good"] .meter-fill { background: var(--good); }
@@ -262,7 +263,7 @@ kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4p
 .top-left { display: flex; flex-direction: column; gap: .4rem; }
 .warroom { display: grid; grid-template-columns: 19rem minmax(0, 1fr) 17rem; gap: 1.25rem; padding: 1.25rem 0 2rem; align-items: start; }
 .panel-title { font: 700 .75rem var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 .6rem; }
-.stage .card { padding: 1.5rem 1.6rem; }
+.stage .card { padding: 1.5rem 1.6rem; scroll-margin-top: 8rem; }
 .stage h2 { margin-bottom: .6rem; }
 .narrative { font-size: 1.06rem; }
 .narrative p:last-child { margin-bottom: 0; }
@@ -364,10 +365,19 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--fon
   .warroom { grid-template-columns: 1fr; }
   .warroom .stage { order: -1; }
   .warroom-top .wrap { grid-template-columns: 1fr; }
-  .meters { grid-template-columns: repeat(5, minmax(4.2rem, 1fr)); overflow-x: auto; gap: .35rem; }
-  .meter { padding: .35rem .4rem .4rem; }
-  .meter-label { font-size: .6rem; letter-spacing: .02em; }
-  .meter-value { font-size: .85rem; }
+  .meters { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .3rem; }
+  .meter { padding: .3rem .35rem .35rem; }
+  .meter-head { flex-direction: column; align-items: flex-start; gap: 0; }
+  .meter-label { font-size: .62rem; letter-spacing: .03em; }
+  .meter-label .full { display: none; }
+  .meter-label .short { display: inline; }
+  .meter-value { font-size: .82rem; }
+  .meter-delta { top: auto; bottom: -.6rem; right: .1rem; font-size: .62rem; z-index: 1; }
+  .scenario-name { display: none; }
+  .warroom-top { padding: .45rem 0; }
+  .warroom-top .wrap { gap: .4rem; }
+  .clock { font-size: .9rem; padding: .35rem .6rem; }
+  .stage .card { scroll-margin-top: 6.5rem; }
   .top-left { flex-direction: row; justify-content: space-between; align-items: center; }
   .outcome-head { grid-template-columns: 1fr; }
   .compare { grid-template-columns: 1fr; }

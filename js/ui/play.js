@@ -24,6 +24,7 @@ let pending = null;      // presentation mode: { choice } awaiting reveal
 let timer = null;        // presentation mode: per-decision countdown
 let timerOn = getPref('timer') !== false;
 const TIMER_SECONDS = 45;
+const SHORT = { cost: 'Cost', downtime: 'Down', dataLoss: 'Data', trust: 'Trust', legal: 'Legal' };
 
 // ---------------------------------------------------------------- boot
 async function boot() {
@@ -91,7 +92,7 @@ function showSplash(saved) {
 function buildMeters() {
   $('meters').innerHTML = METERS.map((k) => `
     <div class="meter" id="meter-${k}">
-      <div class="meter-head"><span class="meter-label">${esc(METER_INFO[k].label)}</span><span class="meter-value" id="mv-${k}"></span></div>
+      <div class="meter-head"><span class="meter-label"><span class="full">${esc(METER_INFO[k].label)}</span><span class="short" aria-hidden="true">${SHORT[k]}</span></span><span class="meter-value" id="mv-${k}"></span></div>
       <div class="meter-bar" aria-hidden="true"><div class="meter-fill" id="mf-${k}"></div></div>
       <span class="meter-delta" id="md-${k}" aria-hidden="true"></span>
     </div>`).join('');

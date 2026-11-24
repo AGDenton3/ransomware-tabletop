@@ -131,5 +131,12 @@
     "year": 2024,
     "url": "https://www.epa.gov/cyberwater/cybersecurity-planning",
     "note": "EPA resources, including the Cybersecurity Incident Action Checklist, an incident response plan template, and free cyber assessments for utilities."
+  },
+  "fbi-psa-2019-high-impact": {
+    "title": "High-Impact Ransomware Attacks Threaten U.S. Businesses and Organizations (PSA I-100219-PSA)",
+    "publisher": "Federal Bureau of Investigation, Internet Crime Complaint Center (IC3)",
+    "year": 2019,
+    "url": "https://www.ic3.gov/media/2019/191002.aspx",
+    "note": "The FBI does not support paying a ransom, but recognizes that executives facing inoperability will evaluate all options. It urges victims to report regardless of whether they pay."
   }
 }
