@@ -4,10 +4,19 @@
       "id": "clinic",
       "file": "clinic.json",
       "title": "Brazos Valley Family Clinic",
-      "orgType": "Healthcare \u00b7 Outpatient clinic",
+      "orgType": "Healthcare · Outpatient clinic",
       "difficulty": "Intermediate",
       "estMinutes": 12,
       "blurb": "A 40-person family clinic loses its electronic health records on a busy morning. Patient data is at stake, the owner wants to stay open, and the attackers are threatening to publish."
+    },
+    {
+      "id": "water-utility",
+      "file": "water-utility.json",
+      "title": "City of Millbrook Water & Wastewater",
+      "orgType": "Critical infrastructure · Municipal water utility",
+      "difficulty": "Advanced",
+      "estMinutes": 14,
+      "blurb": "A small city's billing and email are encrypted, and the only link to the water plant's control network runs through the compromised domain. Do you cut the plant off and run it by hand?"
     }
   ]
 }

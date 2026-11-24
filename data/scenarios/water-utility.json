@@ -1,0 +1,1983 @@
+{
+  "id": "water-utility",
+  "title": "City of Millbrook Water & Wastewater",
+  "orgType": "Critical infrastructure · Municipal water utility",
+  "difficulty": "Advanced",
+  "estMinutes": 14,
+  "startTime": "06:50",
+  "orgProfile": {
+    "name": "City of Millbrook Water & Wastewater (fictional, Texas)",
+    "size": "Serves about 30,000 residents · 58 staff · one treatment plant, one wastewater plant, 14 lift stations",
+    "description": "A city department that treats and delivers drinking water and collects wastewater. It reports to the city manager, and the city council approves the budget. IT is a three-person city team shared with every department.",
+    "criticalSystems": [
+      "SCADA monitoring for the treatment plant and lift stations (OT)",
+      "Utility billing",
+      "Customer payment portal",
+      "City email",
+      "Windows domain shared by all city departments"
+    ],
+    "backups": "Nightly tape backups of the city's servers, stored in the City Hall basement. The last restore test was 18 months ago.",
+    "insurance": "No cyber insurance. Unbudgeted spending over $50,000 needs city manager approval; payments to outside parties need city council approval.",
+    "regulatedData": [
+      "Customer account records (names, addresses, driver's license numbers from account setup)",
+      "Employee HR records",
+      "Public records subject to state open-records law"
+    ]
+  },
+  "ransomNote": {
+    "gang": "Gray Meridian",
+    "demand": "$750,000 in Bitcoin",
+    "deadlineHours": 96,
+    "text": "City of Millbrook: your servers are encrypted and we have your customers' files. We know where your plant is. Pay and we disappear. Ignore us, and your residents will learn how little you protect them."
+  },
+  "startingMeters": {
+    "cost": 0,
+    "downtime": 0,
+    "dataLoss": 0,
+    "trust": 70,
+    "legal": 10
+  },
+  "scoring": {
+    "costBad": 1500000,
+    "downtimeBad": 600
+  },
+  "qa": {
+    "shouldNotDominate": [
+      "paid",
+      "otConnected",
+      "claimedOutageOnly"
+    ]
+  },
+  "hiddenFacts": {
+    "jumpHostReached": {
+      "value": true,
+      "label": "The attackers reached the engineering jump host on the IT/OT boundary, one step from the plant's controllers",
+      "preparation": {
+        "measure": "Segment IT from OT, with a monitored, tightly limited path between them",
+        "csf": "PR",
+        "detail": "A flat link let an IT intrusion reach the machine engineers use to program the plant. CISA and FBI advise robust IT/OT segmentation so attackers cannot pivot."
+      }
+    },
+    "controllersUntouched": {
+      "value": true,
+      "label": "The plant controllers were never modified, but only an OT assessment could prove it",
+      "preparation": {
+        "measure": "Keep known-good baselines of PLC logic and configurations",
+        "csf": "ID",
+        "detail": "With baselines, 'were the controllers touched?' is a comparison you can run in an hour, not a question that hangs over the city for weeks."
+      }
+    },
+    "tapeRestoreSlow": {
+      "value": true,
+      "label": "Several backup tapes were unreadable and a full restore took weeks, not days",
+      "preparation": {
+        "measure": "Replace untested tape with offline or immutable backups, and test restores on a schedule",
+        "csf": "PR",
+        "detail": "A backup that has not been restore-tested is a hope, not a plan."
+      }
+    },
+    "vpnUnpatched": {
+      "value": true,
+      "label": "Initial access came through an unpatched, internet-facing VPN appliance",
+      "preparation": {
+        "measure": "Enroll in CISA's free vulnerability scanning and patch internet-facing systems first",
+        "csf": "ID",
+        "detail": "Water utilities can get no-cost scanning of their internet-facing systems, with weekly reports."
+      }
+    },
+    "dataExfiltrated": {
+      "value": true,
+      "label": "About 12 GB of customer and HR records were copied out before encryption",
+      "preparation": {
+        "measure": "Write and rehearse an IR plan that covers manual plant operation and public communications",
+        "csf": "GV",
+        "detail": "The EPA and CISA provide incident response plan templates and checklists for utilities. Knowing in advance who decides and who speaks saves the first, most important hours."
+      }
+    }
+  },
+  "start": "w01_alarm",
+  "board": {
+    "items": [
+      {
+        "label": "IT systems",
+        "states": [
+          {
+            "if": {
+              "recoveryDone": true
+            },
+            "text": "Restored, under monitoring",
+            "tone": "good"
+          },
+          {
+            "if": {
+              "tapeRestoreStarted": true
+            },
+            "text": "Restoring from tape",
+            "tone": "warn"
+          },
+          {
+            "if": {
+              "itIsolated": true
+            },
+            "text": "Domain isolated; billing, portal, email down",
+            "tone": "warn"
+          }
+        ],
+        "default": "Unknown (billing and email affected)"
+      },
+      {
+        "label": "Plant (OT) link",
+        "states": [
+          {
+            "if": {
+              "segmented": true
+            },
+            "text": "Segmented, monitored path",
+            "tone": "good"
+          },
+          {
+            "if": {
+              "otIsolated": true
+            },
+            "text": "Disconnected; manual operation",
+            "tone": "warn"
+          },
+          {
+            "if": {
+              "otFiltered": true
+            },
+            "text": "Connected, filtered",
+            "tone": "warn"
+          },
+          {
+            "if": {
+              "otConnected": true
+            },
+            "text": "Connected to compromised IT",
+            "tone": "bad"
+          }
+        ],
+        "default": "Unknown"
+      },
+      {
+        "label": "Plant controllers",
+        "states": [
+          {
+            "if": {
+              "controllersVerified": true
+            },
+            "text": "Verified unchanged",
+            "tone": "good"
+          },
+          {
+            "if": {
+              "knowsJumpHost": true
+            },
+            "text": "Jump host reached; controllers unverified",
+            "tone": "bad"
+          }
+        ],
+        "default": "Unknown"
+      },
+      {
+        "label": "How they got in",
+        "states": [
+          {
+            "if": {
+              "knowsInitialAccess": true
+            },
+            "text": "Unpatched VPN appliance",
+            "tone": "bad"
+          }
+        ],
+        "default": "Unknown"
+      },
+      {
+        "label": "Backups",
+        "states": [
+          {
+            "if": {
+              "testedTapes": true
+            },
+            "text": "Tape: partly readable, slow",
+            "tone": "warn"
+          },
+          {
+            "if": {
+              "tapeSurprise": true
+            },
+            "text": "Tape: failures mid-restore",
+            "tone": "bad"
+          }
+        ],
+        "default": "Unknown (tape, untested 18 months)"
+      },
+      {
+        "label": "Data exfiltration",
+        "states": [
+          {
+            "if": {
+              "confirmedExfil": true
+            },
+            "text": "Confirmed (about 12 GB)",
+            "tone": "bad"
+          }
+        ],
+        "default": "Unknown"
+      },
+      {
+        "label": "Ransom",
+        "states": [
+          {
+            "if": {
+              "paid": true
+            },
+            "text": "Paid (council-approved)",
+            "tone": "bad"
+          },
+          {
+            "if": {
+              "refusedToPay": true
+            },
+            "text": "Declined",
+            "tone": "good"
+          },
+          {
+            "if": {
+              "negotiating": true
+            },
+            "text": "Council considering",
+            "tone": "warn"
+          }
+        ],
+        "default": "No contact"
+      }
+    ],
+    "notifications": [
+      {
+        "flag": "notifiedLeadership",
+        "label": "City manager"
+      },
+      {
+        "flag": "notifiedLegal",
+        "label": "City attorney"
+      },
+      {
+        "flag": "councilBriefed",
+        "label": "City council"
+      },
+      {
+        "flag": "notifiedDIR",
+        "label": "Texas DIR (48 h)"
+      },
+      {
+        "flag": "notifiedFBI",
+        "label": "FBI / CISA"
+      },
+      {
+        "flag": "notifiedRegulators",
+        "label": "Texas AG"
+      },
+      {
+        "flag": "notifiedPublic",
+        "label": "Residents"
+      }
+    ]
+  },
+  "nodes": {
+    "w01_alarm": {
+      "title": "Monday, 6:50 a.m.",
+      "clockAdvance": 0,
+      "inbox": [
+        {
+          "from": "Treatment plant control room (radio relay)",
+          "channel": "phone",
+          "body": "Morning. SCADA screens are up and the plant is running fine, but the historian trend server isn't responding, and email's dead on our end. Just letting you know."
+        },
+        {
+          "from": "Tasha Greene, Billing Supervisor",
+          "channel": "text",
+          "body": "Got in early for the bill run. Every screen in billing has a gray page saying our files are encrypted?? It says it's from 'Gray Meridian'."
+        }
+      ],
+      "narrative": "You are the city's IT manager. The billing office is encrypted, city email is down, and the plant's data historian (a server on the IT network that records plant trends) has gone quiet. The plant itself is still running.\n\nThe IT network and the plant's SCADA network are joined by a single link that a contractor installed years ago. What do you do first?",
+      "choices": [
+        {
+          "id": "isolate_it",
+          "label": "Isolate the city domain: cut internet access and disconnect affected servers and PCs",
+          "hint": "Billing, email and the payment portal all go dark for the whole city.",
+          "csf": "RS",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "keyDecision": true,
+          "keyGroup": "contain",
+          "effects": {
+            "downtime": 6,
+            "cost": 3000,
+            "trust": -1
+          },
+          "setFlags": {
+            "itIsolated": true
+          },
+          "next": "w02_otlink",
+          "debrief": {
+            "whyItMatters": "The domain is shared by every city department. Isolating it fast limits how far encryption spreads, and how close it gets to the plant.",
+            "betterPractice": "Isolate affected systems at the network level first, then work out the scope.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "shut_visible",
+          "label": "Shut down only the billing and email servers, the ones showing the note",
+          "hint": "Other departments keep working; police and fire dispatch use the same domain.",
+          "csf": "RS",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "dataLoss": 8,
+            "downtime": 2
+          },
+          "setFlags": {
+            "itIsolated": true,
+            "partialContain": true
+          },
+          "next": "w02_otlink",
+          "debrief": {
+            "whyItMatters": "The visible symptoms show where encryption finished, not where the attacker is. A shared domain means every connected department is still exposed.",
+            "betterPractice": "Contain at the network or domain level, and use pre-planned workarounds for critical services such as dispatch.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "vendor_remote",
+          "label": "Have the billing software vendor remote in to take a look",
+          "hint": "They know the system and can be on in ten minutes.",
+          "csf": "DE",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "dataLoss": 10,
+            "legal": 4,
+            "downtime": 2
+          },
+          "setFlags": {
+            "vendorRemote": true
+          },
+          "next": "w02_otlink",
+          "debrief": {
+            "whyItMatters": "Opening new remote access into a compromised network adds another path for the attacker, and the vendor is not an incident responder.",
+            "betterPractice": "Contain first. Bring in responders with forensic experience, and don't open new remote sessions into the compromised network.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "nist-sp800-61r3"
+            ]
+          }
+        }
+      ]
+    },
+    "w02_otlink": {
+      "title": "Cut the plant off, or keep watching?",
+      "clockAdvance": 0.5,
+      "inbox": [
+        {
+          "from": "Ray Delgado, Plant Superintendent",
+          "channel": "phone",
+          "body": "If you pull that link, we lose remote view of all fourteen lift stations and the reservoir levels in town. I'd need operators driving the stations and someone on every console around the clock. I've got eight certified operators. I can do it, but it'll hurt. Your call; I just need to know in the next half hour."
+        }
+      ],
+      "narrative": "The one link between IT and the plant's SCADA network is how the attackers could reach the systems that run the water. Cutting it is the safe move for the plant's controls, but the staffing cost is real, and you lose some visibility.\n\nCISA and the FBI advise being able to run OT even when IT is compromised. Millbrook has never practised it.",
+      "choices": [
+        {
+          "id": "cut_ot",
+          "label": "Disconnect OT from IT now and run the plant and lift stations manually",
+          "hint": "Plant controls are protected. Operators work long shifts and drive the stations.",
+          "csf": "RS",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "keyDecision": true,
+          "keyGroup": "otIsolate",
+          "effects": {
+            "cost": 12000
+          },
+          "setFlags": {
+            "otIsolated": true,
+            "manualOps": true
+          },
+          "next": "w03_manual",
+          "debrief": {
+            "whyItMatters": "Separating OT from a compromised IT network removes the path to the controllers. Manual operation is the safety net that makes it possible.",
+            "betterPractice": "Segment IT from OT in advance, and regularly test manual operation so that disconnecting is a drill, not an improvisation.",
+            "realWorld": "In 2021 Colonial Pipeline halted pipeline operations after a ransomware attack on its IT network. CISA and the FBI's advisory afterwards stressed IT/OT segmentation and tested manual controls.",
+            "referenceIds": [
+              "cisa-aa21-131a",
+              "cisa-ot-primary-mitigations",
+              "wws-ir-guide"
+            ]
+          }
+        },
+        {
+          "id": "filter_ot",
+          "label": "Keep the link but have the contractor lock the firewall down to SCADA traffic only",
+          "hint": "Operators keep remote view. Takes a few hours and the rules have never been audited.",
+          "csf": "PR",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 6000,
+            "legal": 6
+          },
+          "setFlags": {
+            "otFiltered": true,
+            "otConnected": true
+          },
+          "next": "w04_citymgr",
+          "debrief": {
+            "whyItMatters": "Filtering is better than nothing, but an unaudited rule set on a link into a compromised network still leaves a path if the attacker already sits on a host that is allowed through.",
+            "betterPractice": "When IT is compromised, disconnect OT and operate manually until the boundary is verified.",
+            "referenceIds": [
+              "cisa-aa21-131a",
+              "cisa-ot-primary-mitigations"
+            ]
+          }
+        },
+        {
+          "id": "keep_ot",
+          "label": "Keep OT connected; the plant is running fine and visibility is safety",
+          "hint": "No staffing crunch. Operators keep every screen.",
+          "csf": "RS",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "legal": 8
+          },
+          "setFlags": {
+            "otConnected": true
+          },
+          "next": "w04_citymgr",
+          "debrief": {
+            "whyItMatters": "The plant 'running fine' says nothing about whether the attacker can reach it. Leaving the link up kept a path open from a compromised domain to the engineering jump host.",
+            "betterPractice": "Treat the IT/OT link as part of containment. Visibility can come from operators on site.",
+            "referenceIds": [
+              "cisa-aa21-131a",
+              "wws-ir-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "w03_manual": {
+      "title": "Running the plant by hand",
+      "clockAdvance": 1.5,
+      "inbox": [
+        {
+          "from": "Ray Delgado, Plant Superintendent",
+          "channel": "text",
+          "body": "We're manual. Chemical dosing checked by hand every hour, two trucks doing lift-station rounds. I can hold 12-hour shifts for maybe three days before people get dangerous. Need a plan."
+        }
+      ],
+      "narrative": "The plant is safe from the network, but it now runs on people. Fatigue is a public-safety risk too.",
+      "choices": [
+        {
+          "id": "mutual_aid",
+          "label": "Request operators from a neighboring utility under mutual aid and call back two retired operators",
+          "hint": "Costs money and a few phone calls the city manager will want to know about.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 18000
+          },
+          "setFlags": {
+            "mutualAid": true,
+            "notifiedLeadership": true
+          },
+          "next": "w04_citymgr",
+          "debrief": {
+            "whyItMatters": "Sustained manual operation needs more hands. Mutual aid turns a three-day sprint into something you can keep up for weeks.",
+            "betterPractice": "Pre-arrange mutual aid and include manual staffing in the emergency response plan.",
+            "referenceIds": [
+              "wws-ir-guide",
+              "epa-cyberwater"
+            ]
+          }
+        },
+        {
+          "id": "own_staff",
+          "label": "Run on your own eight operators with 16-hour shifts until IT is back",
+          "hint": "Keeps it in the family and off the budget for now.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 5000
+          },
+          "setFlags": {
+            "fatigue": true
+          },
+          "next": "w04_citymgr",
+          "debrief": {
+            "whyItMatters": "Exhausted operators make mistakes, and in a treatment plant mistakes are a public-health risk.",
+            "betterPractice": "Plan staffing for days or weeks of manual operation, not hours.",
+            "referenceIds": [
+              "wws-ir-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "w04_citymgr": {
+      "title": "Who's in charge?",
+      "clockAdvance": 2,
+      "inbox": [
+        {
+          "from": "Rachel Okafor, City Manager",
+          "channel": "phone",
+          "body": "I'm hearing billing is down and something about the plant. Council has a regular meeting tonight at six. I need to know what this is, who's running it, and whether I need to tell the council."
+        }
+      ],
+      "narrative": "A city answers to elected officials, the public and state law. Texas requires local governments to report security incidents, including ransomware, to the Department of Information Resources (DIR) within 48 hours of discovery. Nobody at the city has done that before.",
+      "choices": [
+        {
+          "id": "activate_eoc",
+          "label": "Brief her fully and recommend an incident command structure: you as technical lead, the city attorney engaged, and the DIR report filed today",
+          "hint": "Formal and visible. The council will hear about it tonight.",
+          "csf": "GV",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "escalate",
+          "effects": {
+            "cost": 2000,
+            "legal": -6
+          },
+          "setFlags": {
+            "notifiedLeadership": true,
+            "notifiedLegal": true,
+            "notifiedDIR": true,
+            "commandSet": true
+          },
+          "next": "w05_help",
+          "debrief": {
+            "whyItMatters": "Clear roles and decision authority are what CSF 2.0's Govern function is about. The DIR report is a legal duty with a 48-hour clock.",
+            "betterPractice": "Decide in the IR plan who commands, who decides on spending and payment, and who files mandatory reports.",
+            "referenceIds": [
+              "tx-gov-2054-603",
+              "nist-csf2",
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "brief_director",
+          "label": "Tell your Public Works director and let them handle the politics",
+          "hint": "Keeps you focused on the technical work.",
+          "csf": "GV",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "legal": 3
+          },
+          "setFlags": {
+            "notifiedLeadership": true
+          },
+          "next": "w05_help",
+          "debrief": {
+            "whyItMatters": "Escalating through one layer of management slows decisions that only the city manager or council can make, and nobody owns the 48-hour state report.",
+            "betterPractice": "Escalate directly to whoever holds decision authority, and assign mandatory reporting to a named person.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "tx-gov-2054-603"
+            ]
+          }
+        },
+        {
+          "id": "wait_scope",
+          "label": "Ask for a day to understand the scope before briefing anyone above you",
+          "hint": "Better to bring her facts than fears.",
+          "csf": "GV",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "legal": 7,
+            "trust": -2
+          },
+          "next": "w05_help",
+          "debrief": {
+            "whyItMatters": "Leadership needs to know early, even with incomplete facts. Waiting a day uses up half of the 48-hour state reporting window.",
+            "betterPractice": "Brief early with what you know and what you don't, and update often.",
+            "referenceIds": [
+              "tx-gov-2054-603",
+              "nist-sp800-61r3"
+            ]
+          }
+        }
+      ]
+    },
+    "w05_help": {
+      "title": "No insurance, no retainer",
+      "clockAdvance": 2,
+      "inbox": [
+        {
+          "from": "City Purchasing Office",
+          "channel": "email",
+          "subject": "Emergency procurement",
+          "body": "Any contract over $50k needs an emergency declaration from the city manager. We can get one today if it's justified."
+        }
+      ],
+      "narrative": "Millbrook has no cyber insurance and no incident-response firm on retainer. You need outside help, and the plant makes this a critical-infrastructure incident.",
+      "choices": [
+        {
+          "id": "call_cisa",
+          "label": "Report to the FBI and request CISA assistance, including an assessment of the OT side",
+          "hint": "No cost. Federal help focused on critical infrastructure. Takes most of a day to arrive.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "help",
+          "effects": {
+            "downtime": 4,
+            "legal": -2
+          },
+          "setFlags": {
+            "notifiedFBI": true,
+            "cisaEngaged": true
+          },
+          "next": "w06_assessment",
+          "debrief": {
+            "whyItMatters": "Federal partners can help water utilities at each stage of a response, including OT, which most commercial IT responders do not cover. Their assessment is the only way to learn whether the controllers were touched.",
+            "betterPractice": "Know the federal and state contacts for your sector before an incident, and report early.",
+            "referenceIds": [
+              "wws-ir-guide",
+              "cisa-stopransomware-guide",
+              "fbi-ic3-ransomware"
+            ]
+          }
+        },
+        {
+          "id": "hire_firm",
+          "label": "Declare an emergency and hire a commercial IR firm",
+          "hint": "Fast and dedicated, about $120,000 to start. Their scope is IT.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "cost": 120000,
+            "downtime": 2
+          },
+          "setFlags": {
+            "irFirm": true
+          },
+          "next": "w06b_irfirm",
+          "debrief": {
+            "whyItMatters": "A commercial firm brings speed and forensic depth on IT, but it costs money a city without insurance didn't budget, and OT is often out of scope.",
+            "betterPractice": "Combine commercial help with federal resources, and make sure someone covers OT.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "wws-ir-guide"
+            ]
+          }
+        },
+        {
+          "id": "in_house",
+          "label": "Handle it with city IT and the billing vendor",
+          "hint": "No procurement fight, and you know the network.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "legal": 5,
+            "downtime": 6
+          },
+          "next": "w07_scope_self",
+          "debrief": {
+            "whyItMatters": "Three generalists cannot do forensics, OT assessment and recovery at once, and nobody on the team can say whether the plant was touched.",
+            "betterPractice": "Escalate early for outside help, much of which is free for water utilities.",
+            "referenceIds": [
+              "wws-ir-guide",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "w06_assessment": {
+      "title": "What the assessment found",
+      "clockAdvance": 16,
+      "setFlags": {
+        "knowsJumpHost": true,
+        "controllersVerified": true,
+        "knowsInitialAccess": true,
+        "confirmedExfil": true
+      },
+      "inbox": [
+        {
+          "from": "Federal assessment team lead",
+          "channel": "email",
+          "subject": "Initial findings (TLP:AMBER, fictional)",
+          "body": "1) Initial access: unpatched VPN appliance, exploited 11 days ago.\n2) The actor reached ENG-JUMP01, the engineering jump host on the IT/OT boundary, 4 days ago.\n3) PLC logic and HMI project files match the plant's last known-good copies. We found no evidence of changes to controllers.\n4) About 12 GB of HR and customer files were staged and exfiltrated."
+        }
+      ],
+      "narrative": "The attackers were one step from the plant's controls, and didn't take it. That is the best news you've had all week, and the most frightening. The jump host has to be rebuilt, and the link that let them reach it has to change.",
+      "choices": [
+        {
+          "id": "segment_now",
+          "label": "Rebuild the jump host, patch the VPN, reset all credentials, and redesign the IT/OT boundary before reconnecting",
+          "hint": "Weeks of manual-ops strain if OT stays off. Done right.",
+          "csf": "PR",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "keyDecision": true,
+          "keyGroup": "segment",
+          "effects": {
+            "cost": 45000,
+            "legal": -2
+          },
+          "setFlags": {
+            "segmented": true,
+            "resetCredentials": true
+          },
+          "next": "w08_tapes",
+          "debrief": {
+            "whyItMatters": "The flat link was the attacker's route to the plant's front door. Redesigning the boundary removes the route, not just this attacker.",
+            "betterPractice": "Use a segmented architecture with a monitored path between IT and OT, and limit what can cross it.",
+            "referenceIds": [
+              "cisa-aa21-131a",
+              "cisa-ot-primary-mitigations"
+            ]
+          }
+        },
+        {
+          "id": "rebuild_only",
+          "label": "Rebuild the jump host and reset credentials, then put the old link back once IT is clean",
+          "hint": "Operators get their remote view back sooner.",
+          "csf": "PR",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 15000,
+            "legal": 3
+          },
+          "setFlags": {
+            "resetCredentials": true,
+            "flatAgain": true
+          },
+          "next": "w08_tapes",
+          "debrief": {
+            "whyItMatters": "Cleaning the host without changing the architecture leaves the same route for the next intrusion.",
+            "betterPractice": "Fix the path, not just the machine.",
+            "referenceIds": [
+              "cisa-aa21-131a"
+            ]
+          }
+        }
+      ]
+    },
+    "w06b_irfirm": {
+      "title": "The IR firm's report",
+      "clockAdvance": 20,
+      "setFlags": {
+        "knowsInitialAccess": true,
+        "confirmedExfil": true,
+        "resetCredentials": true
+      },
+      "inbox": [
+        {
+          "from": "Halyard & Finch Cyber Response (fictional contract IR firm)",
+          "channel": "email",
+          "subject": "IT findings",
+          "body": "Entry via unpatched VPN appliance. Domain admin compromised. About 12 GB of HR and customer data exfiltrated. Credentials reset and VPN patched. NOTE: the OT network and ENG-JUMP01 are outside our scope. We saw connections from the domain to that host but cannot assess the SCADA side."
+        }
+      ],
+      "narrative": "The IT side is understood and cleaned. The plant side is a question mark: something on the domain talked to the engineering jump host.",
+      "choices": [
+        {
+          "id": "add_cisa",
+          "label": "Request a CISA assessment of the OT side now",
+          "hint": "Another day of waiting for answers.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "help",
+          "effects": {
+            "downtime": 4,
+            "legal": -3
+          },
+          "setFlags": {
+            "notifiedFBI": true,
+            "cisaEngaged": true
+          },
+          "next": "w06_assessment",
+          "debrief": {
+            "whyItMatters": "Only an OT assessment could answer whether the controllers were touched, and that is the question residents care about most.",
+            "betterPractice": "Cover OT explicitly whenever IT is compromised at a utility.",
+            "referenceIds": [
+              "wws-ir-guide",
+              "cisa-ot-primary-mitigations"
+            ]
+          }
+        },
+        {
+          "id": "ot_looks_fine",
+          "label": "The plant looks normal on the HMI; keep the focus on IT recovery",
+          "hint": "Operators see nothing unusual.",
+          "csf": "ID",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "legal": 6
+          },
+          "setFlags": {
+            "otUnverified": true
+          },
+          "next": "w08_tapes",
+          "debrief": {
+            "whyItMatters": "An HMI showing normal values is not evidence that controller logic is unchanged. The jump host was reached and never examined.",
+            "betterPractice": "Verify OT integrity against known-good baselines after any IT/OT boundary compromise.",
+            "referenceIds": [
+              "cisa-ot-primary-mitigations",
+              "wws-ir-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "w07_scope_self": {
+      "title": "What you can see on your own",
+      "clockAdvance": 8,
+      "setFlags": {
+        "knowsInitialAccess": true
+      },
+      "inbox": [
+        {
+          "from": "VPN appliance (log export)",
+          "channel": "email",
+          "subject": "Admin sessions",
+          "body": "Unknown admin sessions from overseas addresses over 11 days. Appliance firmware is 14 months behind. A vendor advisory for this model lists a critical remote-access flaw."
+        }
+      ],
+      "narrative": "You found the way in: the VPN appliance. You can see the domain was owned. You cannot see what happened on the OT side, or what data left.",
+      "choices": [
+        {
+          "id": "self_cisa",
+          "label": "Call for help now: report to the FBI and request CISA assistance",
+          "hint": "Late, but you get OT expertise.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "help",
+          "effects": {
+            "downtime": 6,
+            "legal": -2
+          },
+          "setFlags": {
+            "notifiedFBI": true,
+            "cisaEngaged": true
+          },
+          "next": "w06_assessment",
+          "debrief": {
+            "whyItMatters": "Recognizing the limits of your team is a strength. Federal help covers the OT question you can't answer alone.",
+            "betterPractice": "Escalate as soon as the scope exceeds your team's skills.",
+            "referenceIds": [
+              "wws-ir-guide",
+              "fbi-ic3-ransomware"
+            ]
+          }
+        },
+        {
+          "id": "patch_move_on",
+          "label": "Patch the VPN, reset passwords and move to recovery",
+          "hint": "You closed the door. Time to get billing back.",
+          "csf": "PR",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 4000,
+            "legal": 6
+          },
+          "setFlags": {
+            "resetCredentials": true,
+            "otUnverified": true
+          },
+          "next": "w08_tapes",
+          "debrief": {
+            "whyItMatters": "You closed the known door but never learned what the attacker did inside, including near the plant, or what data they took.",
+            "betterPractice": "Scope before recovery, especially where OT is involved.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "w08_tapes": {
+      "title": "The tape reality check",
+      "clockAdvance": 24,
+      "inbox": [
+        {
+          "from": "Kevin Marsh, City IT Technician",
+          "channel": "text",
+          "body": "Found the tape set in the basement. 31 tapes for the last full backup. The drive throws an error on the first one I tried but the second loaded. Last restore test was... 18 months ago?"
+        }
+      ],
+      "narrative": "Tape is the city's only backup. It was never connected to the domain, so the attackers couldn't encrypt it. Nobody knows how long a full restore takes, or whether every tape reads.",
+      "choices": [
+        {
+          "id": "test_tapes",
+          "label": "Test-restore a sample from several tapes first, then publish a realistic timeline",
+          "hint": "Costs a day and the news will be bad. But it will be true.",
+          "csf": "ID",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "backups",
+          "effects": {
+            "downtime": 12,
+            "cost": 3000
+          },
+          "setFlags": {
+            "testedTapes": true
+          },
+          "next": "w09_council",
+          "debrief": {
+            "whyItMatters": "The test showed three unreadable tapes and a restore measured in weeks. Knowing that up front shaped every later decision, including the council's.",
+            "betterPractice": "Test restores routinely. In an incident, test before you promise.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "cisa-cpg"
+            ]
+          }
+        },
+        {
+          "id": "start_restore",
+          "label": "Start the full restore immediately and tell the city manager billing is back by Friday",
+          "hint": "Every hour of testing is an hour not restoring.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 4
+          },
+          "setFlags": {
+            "promisedFriday": true
+          },
+          "next": "w09_council",
+          "debrief": {
+            "whyItMatters": "The restore hit unreadable tapes partway through, and the Friday promise became a public broken commitment.",
+            "betterPractice": "Do not announce recovery dates until a test restore succeeds.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "w09_council": {
+      "title": "Emergency council session",
+      "clockAdvance": 10,
+      "inbox": [
+        {
+          "from": "Gray Meridian · negotiation portal",
+          "channel": "portal",
+          "body": "City of Millbrook. 12 GB: customer IDs, employee SSNs. Price $750,000. Pay in 48h, price $600,000. You have a water plant. Think about your residents."
+        },
+        {
+          "from": "Councilmember Hal Pruitt",
+          "channel": "email",
+          "subject": "Just pay it?",
+          "body": "If paying ends this quickly, that's cheaper than weeks of overtime and angry residents. Why wouldn't we?"
+        }
+      ],
+      "narrative": "Any payment to an outside party needs a council vote, which makes the ransom a governance decision, not an IT one. The council wants your recommendation in closed session. Whatever they decide will eventually be public record.",
+      "choices": [
+        {
+          "id": "recommend_no",
+          "label": "Recommend against paying: present the recovery plan, the FBI's position and Treasury's sanctions advisory, and ask for emergency recovery funds instead",
+          "hint": "Some council members will push back hard.",
+          "requires": {
+            "testedTapes": true
+          },
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "keyDecision": true,
+          "keyGroup": "council",
+          "effects": {
+            "cost": 0,
+            "legal": -3
+          },
+          "setFlags": {
+            "refusedToPay": true,
+            "councilBriefed": true
+          },
+          "next": "w10_public",
+          "debrief": {
+            "whyItMatters": "A tested recovery plan lets the council decline from strength. The U.S. government strongly discourages paying, and paying a sanctioned actor carries strict-liability risk.",
+            "betterPractice": "Make the payment decision a documented governance decision, with counsel and law enforcement involved.",
+            "referenceIds": [
+              "ofac-ransomware-advisory-2021",
+              "fbi-ic3-ransomware",
+              "nist-csf2"
+            ]
+          }
+        },
+        {
+          "id": "recommend_no_blind",
+          "label": "Recommend against paying, on principle",
+          "hint": "You haven't tested the tapes, but you don't want to fund criminals.",
+          "requires": {
+            "testedTapes": false
+          },
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "keyDecision": true,
+          "keyGroup": "council",
+          "effects": {
+            "legal": -1
+          },
+          "setFlags": {
+            "refusedToPay": true,
+            "councilBriefed": true
+          },
+          "next": "w10_public",
+          "debrief": {
+            "whyItMatters": "Declining is consistent with FBI and Treasury guidance, but without a tested recovery plan the council was betting on tapes nobody had checked.",
+            "betterPractice": "Pair 'don't pay' with a verified recovery plan.",
+            "referenceIds": [
+              "fbi-ic3-ransomware",
+              "ofac-ransomware-advisory-2021"
+            ]
+          }
+        },
+        {
+          "id": "neutral",
+          "label": "Present the options neutrally and let the council decide",
+          "hint": "It's their call and their political risk.",
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "legal": 2
+          },
+          "setFlags": {
+            "councilBriefed": true
+          },
+          "next": [
+            {
+              "if": {
+                "testedTapes": true
+              },
+              "next": "w10_public"
+            },
+            {
+              "else": "w09b_pay"
+            }
+          ],
+          "debrief": {
+            "whyItMatters": "Without a recommendation, the council leans on whatever looks fastest. With tested tapes, the recovery plan spoke for itself; without them, paying looked like the only certain option.",
+            "betterPractice": "Give decision-makers a clear recommendation, with evidence and risks.",
+            "referenceIds": [
+              "nist-csf2",
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "ask_authority",
+          "label": "Ask the council for authority to negotiate and pay if needed",
+          "hint": "Keeps the option open if the tapes fail.",
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "legal": 4
+          },
+          "setFlags": {
+            "councilBriefed": true,
+            "negotiating": true
+          },
+          "next": "w09b_pay",
+          "debrief": {
+            "whyItMatters": "Pre-authorizing payment signals intent, and public records will show the city was prepared to pay criminals.",
+            "betterPractice": "Exhaust recovery options and involve law enforcement before seeking payment authority.",
+            "referenceIds": [
+              "ofac-ransomware-advisory-2021",
+              "fbi-ic3-ransomware"
+            ]
+          }
+        }
+      ]
+    },
+    "w09b_pay": {
+      "title": "Authority to pay",
+      "clockAdvance": 18,
+      "inbox": [
+        {
+          "from": "City Attorney's Office",
+          "channel": "email",
+          "subject": "If we pay",
+          "body": "If the council goes ahead, we must screen the recipient against Treasury sanctions lists, involve the FBI, and expect the payment to be disclosed under open-records law. We cannot guarantee any of that clears in 48 hours."
+        }
+      ],
+      "narrative": "The council has authorized up to $600,000 in closed session. The tape restore is crawling. Paying might bring billing back faster, but it is public money, and there is no guarantee.",
+      "choices": [
+        {
+          "id": "pay_screened",
+          "label": "Pay through the city attorney after sanctions screening, with the FBI informed",
+          "hint": "If the city pays, it pays by the book.",
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 600000,
+            "legal": 8,
+            "trust": -6
+          },
+          "setFlags": {
+            "paid": true,
+            "notifiedFBI": true,
+            "negotiating": false
+          },
+          "next": "w09c_decrypt",
+          "debrief": {
+            "whyItMatters": "Screening reduces sanctions exposure, but paying with public money still funds the next attack and buys no guarantee about the stolen data.",
+            "betterPractice": "If payment is ever considered, do it with counsel, sanctions screening and law enforcement, and plan for the data to leak anyway.",
+            "referenceIds": [
+              "ofac-ransomware-advisory-2021",
+              "fbi-ic3-ransomware"
+            ]
+          }
+        },
+        {
+          "id": "withdraw",
+          "label": "Withdraw the request and keep restoring from tape",
+          "hint": "Slow, but it's the city's own data.",
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "legal": -2
+          },
+          "setFlags": {
+            "refusedToPay": true,
+            "negotiating": false
+          },
+          "next": "w10_public",
+          "debrief": {
+            "whyItMatters": "Choosing to recover without paying is slower here, but avoids funding criminals and the sanctions question entirely.",
+            "betterPractice": "Plan restores well enough that payment is never the only path.",
+            "referenceIds": [
+              "fbi-ic3-ransomware",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "w09c_decrypt": {
+      "title": "The decryptor",
+      "clockAdvance": 12,
+      "inbox": [
+        {
+          "from": "Gray Meridian · negotiation portal",
+          "channel": "portal",
+          "body": "Payment confirmed. Decryptor attached. Files deleted. Good luck with the plant :)"
+        }
+      ],
+      "narrative": "The tool decrypts small files but fails on the billing database, and it is unclear whether it does anything else. It is untrusted software from the people who attacked you.",
+      "choices": [
+        {
+          "id": "decrypt_sandbox",
+          "label": "Run it only on copies in an isolated lab and restore what fails from tape",
+          "hint": "Slower, but safe.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 72,
+            "cost": 20000,
+            "dataLoss": 8
+          },
+          "setFlags": {
+            "tapeRestoreStarted": true
+          },
+          "next": "w10_public",
+          "debrief": {
+            "whyItMatters": "Attacker tools are untrusted. Testing on copies protects the originals and the network.",
+            "betterPractice": "Treat a decryptor as malware until proven otherwise.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "decrypt_live",
+          "label": "Run it on the production servers to get billing back this week",
+          "hint": "The city paid for speed.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 36,
+            "dataLoss": 22,
+            "legal": 3
+          },
+          "setFlags": {
+            "tapeRestoreStarted": true
+          },
+          "next": "w10_public",
+          "debrief": {
+            "whyItMatters": "The decryptor corrupted part of the billing database, so the city paid for speed and lost data.",
+            "betterPractice": "Never run attacker tools on your only copy.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "fbi-ic3-ransomware"
+            ]
+          }
+        }
+      ]
+    },
+    "w10_public": {
+      "title": "\"Is the water safe?\"",
+      "clockAdvance": 6,
+      "inbox": [
+        {
+          "from": "Millbrook Community Board (social media)",
+          "channel": "news",
+          "subject": "\"Heard the city got HACKED and the water plant too?? Anyone know if it's safe to drink\"",
+          "body": "312 comments · 1.4k shares"
+        },
+        {
+          "from": "Rachel Okafor, City Manager",
+          "channel": "text",
+          "body": "Phones are ringing off the hook. We need to say something today. What can we honestly say?"
+        }
+      ],
+      "narrative": "Residents are frightened about their water. The plant is producing water that meets standards: lab samples have been normal throughout, and operators are on site. Billing is down and customer data may have been taken. The challenge is to be transparent without causing panic.",
+      "choices": [
+        {
+          "id": "joint_statement",
+          "label": "Issue a joint statement with the city manager: water quality is confirmed by lab testing, the plant is staffed, billing is paused with no late fees, data may be affected, and here is a hotline",
+          "hint": "Says what you know and what you don't. Coordinated with the city attorney.",
+          "csf": "RS",
+          "legacyPhase": "Post-Incident Activity",
+          "keyDecision": true,
+          "keyGroup": "public",
+          "effects": {
+            "trust": 10,
+            "cost": 6000
+          },
+          "setFlags": {
+            "notifiedPublic": true
+          },
+          "next": "w11_notify",
+          "debrief": {
+            "whyItMatters": "Transparent, specific public communication answers the question residents actually have (is the water safe?) and keeps rumor from setting the story.",
+            "betterPractice": "Prepare public-safety messaging templates in advance, and coordinate with leadership and counsel.",
+            "referenceIds": [
+              "wws-ir-guide",
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "boil_notice",
+          "label": "Issue a precautionary boil-water notice until the investigation is finished",
+          "hint": "Better safe than sorry, and it covers the city.",
+          "csf": "RS",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "trust": -10,
+            "cost": 40000,
+            "downtime": 24
+          },
+          "setFlags": {
+            "notifiedPublic": true,
+            "boilNotice": true
+          },
+          "next": "w11_notify",
+          "debrief": {
+            "whyItMatters": "Water quality was normal. A boil notice not backed by test results caused real hardship and panic, and taught residents to discount future warnings.",
+            "betterPractice": "Base public-health actions on water-quality data and your emergency plan, not on uncertainty about IT.",
+            "referenceIds": [
+              "wws-ir-guide",
+              "epa-cyberwater"
+            ]
+          }
+        },
+        {
+          "id": "outage_only",
+          "label": "Call it an 'IT outage affecting billing' and say nothing about the plant or data",
+          "hint": "Technically true. Avoids alarming anyone.",
+          "csf": "RS",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "trust": 2,
+            "legal": 6
+          },
+          "setFlags": {
+            "claimedOutageOnly": true
+          },
+          "next": "w11_notify",
+          "debrief": {
+            "whyItMatters": "With a leak threat public and residents already asking about the plant, a minimized statement is likely to be contradicted, and open-records requests will surface what the city knew.",
+            "betterPractice": "Don't minimize. Say what you know, what you're doing, and when you'll update.",
+            "referenceIds": [
+              "nist-sp800-61r3"
+            ]
+          }
+        }
+      ]
+    },
+    "w11_notify": {
+      "title": "Formal notifications",
+      "clockAdvance": 12,
+      "inbox": [
+        {
+          "from": "City Attorney's Office",
+          "channel": "email",
+          "subject": "Notice obligations",
+          "body": "Customer and employee records with driver's license and Social Security numbers were taken. Texas law requires notice to affected individuals within 60 days and to the Attorney General within 30 days if 250 or more Texans are affected. The 48-hour DIR report is separate."
+        }
+      ],
+      "narrative": "Thousands of customers and every employee may be affected. How and when you notify them is a legal duty and a test of the city's credibility.",
+      "choices": [
+        {
+          "id": "notify_all",
+          "label": "Send notices to customers and employees, file with the Texas AG, and post a public notice and FAQ",
+          "hint": "Costs mailing, call-center and credit-monitoring money.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "notify",
+          "effects": {
+            "cost": 35000,
+            "legal": -8,
+            "trust": 3
+          },
+          "setFlags": {
+            "notifiedRegulators": true,
+            "notifiedPublic": true
+          },
+          "next": "w12_restore",
+          "debrief": {
+            "whyItMatters": "Texas law sets clear deadlines for notifying individuals and the Attorney General. Meeting them, and explaining what people can do, limits both legal exposure and harm to residents.",
+            "betterPractice": "Track every notification clock from the moment of discovery, and notify on what you know.",
+            "referenceIds": [
+              "tx-bcc-521-053",
+              "tx-gov-2054-603"
+            ]
+          }
+        },
+        {
+          "id": "await_report",
+          "label": "Wait until the investigation confirms exactly whose records were taken",
+          "hint": "Avoids notifying 30,000 people who might not be affected.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "legal": 10,
+            "trust": -2
+          },
+          "setFlags": {
+            "delayedNotice": true
+          },
+          "next": "w12_restore",
+          "debrief": {
+            "whyItMatters": "The 30-day Attorney General deadline doesn't wait for a perfect list, and the leak site will tell residents before you do.",
+            "betterPractice": "Notify within the deadlines on the best information you have, and supplement later.",
+            "referenceIds": [
+              "tx-bcc-521-053"
+            ]
+          }
+        }
+      ]
+    },
+    "w12_restore": {
+      "title": "Restoring the city",
+      "clockAdvance": 24,
+      "inbox": [
+        {
+          "from": "Tasha Greene, Billing Supervisor",
+          "channel": "email",
+          "subject": "Customers",
+          "body": "Two weeks without bills means a huge catch-up bill for every household. People on fixed incomes are going to get hurt. Can we do anything?"
+        }
+      ],
+      "narrative": "The tape restore is under way and painfully slow. You can wait it out, or rebuild billing on a hosted platform and re-import accounts.",
+      "choices": [
+        {
+          "id": "tape_priority",
+          "label": "Restore from tape in priority order (billing and portal first), with a no-late-fee grace period and payment plans",
+          "hint": "Slow but complete. Residents get breathing room.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 140,
+            "cost": 30000,
+            "dataLoss": 6,
+            "trust": 3
+          },
+          "setFlags": {
+            "tapeRestoreStarted": true,
+            "recoveryDone": true
+          },
+          "next": "w13_ot",
+          "debrief": {
+            "whyItMatters": "Priority-ordered recovery gets residents' most important services back first, and the grace period limits the financial harm to them.",
+            "betterPractice": "Recover in priority order and plan for the human effects of downtime.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "hosted_billing",
+          "label": "Move billing to a vendor-hosted platform and re-import accounts from the bank and meter data",
+          "hint": "Faster, about $150,000, and some account history is lost.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 72,
+            "cost": 150000,
+            "dataLoss": 12
+          },
+          "setFlags": {
+            "recoveryDone": true,
+            "hostedBilling": true
+          },
+          "next": "w13_ot",
+          "debrief": {
+            "whyItMatters": "Rebuilding on a new platform trades money and history for speed. It is a legitimate recovery strategy when backups are slow.",
+            "betterPractice": "Weigh recovery options on cost, time and data loss, and decide with leadership.",
+            "referenceIds": [
+              "nist-sp800-61r3"
+            ]
+          }
+        }
+      ]
+    },
+    "w13_ot": {
+      "title": "Reconnecting the plant",
+      "clockAdvance": 96,
+      "inbox": [
+        {
+          "from": "Ray Delgado, Plant Superintendent",
+          "channel": "phone",
+          "body": "My people need their remote view back. Whatever you're going to do with that link, do it this week."
+        }
+      ],
+      "narrative": "IT is mostly back. The question now is what the connection between the city network and the plant should look like from here on.",
+      "choices": [
+        {
+          "id": "reconnect_segmented",
+          "label": "Reconnect only through the new segmented, monitored path",
+          "hint": "The design is already built and tested.",
+          "requires": {
+            "segmented": true
+          },
+          "csf": "PR",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "cost": 5000,
+            "trust": 2
+          },
+          "next": "w14_lessons",
+          "debrief": {
+            "whyItMatters": "Operators get their view back without recreating the path the attacker used.",
+            "betterPractice": "Keep IT/OT connections minimal, monitored and documented.",
+            "referenceIds": [
+              "cisa-aa21-131a",
+              "cisa-ot-primary-mitigations"
+            ]
+          }
+        },
+        {
+          "id": "build_segment",
+          "label": "Build a segmented, monitored path first, then reconnect",
+          "hint": "Another two weeks of manual workarounds, and about $60,000.",
+          "requires": {
+            "segmented": false
+          },
+          "csf": "PR",
+          "legacyPhase": "Post-Incident Activity",
+          "keyDecision": true,
+          "keyGroup": "segment",
+          "effects": {
+            "cost": 60000,
+            "legal": -4
+          },
+          "setFlags": {
+            "segmented": true
+          },
+          "next": "w14_lessons",
+          "debrief": {
+            "whyItMatters": "Even late, removing the flat IT/OT link closes the route the attacker used to reach the plant's doorstep.",
+            "betterPractice": "Design the IT/OT boundary deliberately, not as a convenience link.",
+            "referenceIds": [
+              "cisa-aa21-131a",
+              "cisa-ot-primary-mitigations"
+            ]
+          }
+        },
+        {
+          "id": "old_link",
+          "label": "Restore the old link as it was; the attacker is gone",
+          "hint": "Operators are exhausted and the budget is gone.",
+          "requires": {
+            "segmented": false
+          },
+          "csf": "PR",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "legal": 8
+          },
+          "setFlags": {
+            "flatAgain": true
+          },
+          "next": "w14_lessons",
+          "debrief": {
+            "whyItMatters": "The same flat link is waiting for the next attacker, and next time the controllers may not be spared.",
+            "betterPractice": "Never restore the architecture that enabled the incident.",
+            "referenceIds": [
+              "cisa-aa21-131a"
+            ]
+          }
+        }
+      ]
+    },
+    "w14_lessons": {
+      "title": "Day 13: what the city learns",
+      "clockAdvance": 72,
+      "inbox": [
+        {
+          "from": "Rachel Okafor, City Manager",
+          "channel": "email",
+          "subject": "Council wants a plan",
+          "body": "Council wants to know what we'll change and what it costs. Be specific; this will be in the public budget."
+        }
+      ],
+      "narrative": "The plant never stopped producing safe water. The question now is whether Millbrook will be ready next time.",
+      "choices": [
+        {
+          "id": "aar_fund",
+          "label": "Present a public after-action report and a funded plan: patching and CISA scanning, MFA, offline or immutable backups replacing tape, IT/OT segmentation, an IR plan, and yearly manual-operation drills",
+          "hint": "A real budget request in a tight year.",
+          "csf": "GV",
+          "legacyPhase": "Post-Incident Activity",
+          "keyDecision": true,
+          "keyGroup": "lessons",
+          "effects": {
+            "cost": 40000,
+            "trust": 5,
+            "legal": -2
+          },
+          "setFlags": {
+            "lessonsLearned": true
+          },
+          "next": [
+            {
+              "if": {
+                "paid": true
+              },
+              "next": "end_paid"
+            },
+            {
+              "if": {
+                "otUnverified": true
+              },
+              "next": "end_ot"
+            },
+            {
+              "if": {
+                "claimedOutageOnly": true
+              },
+              "next": "end_fallout"
+            },
+            {
+              "else": "end_restored"
+            }
+          ],
+          "debrief": {
+            "whyItMatters": "Every hidden weakness in this scenario, from the unpatched VPN and the flat IT/OT link to untested tape and no plan, was cheaper to fix before the incident than to live through.",
+            "betterPractice": "Run a blameless review, fund remediation, and use free sector resources from CISA and EPA.",
+            "referenceIds": [
+              "cisa-water-vuln-scanning",
+              "epa-cyberwater",
+              "nist-sp800-61r3",
+              "cisa-cpg"
+            ]
+          }
+        },
+        {
+          "id": "minimal_plan",
+          "label": "Patch the VPN and call it done; the budget can't take more",
+          "hint": "The obvious hole is closed.",
+          "csf": "GV",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "legal": 4
+          },
+          "next": [
+            {
+              "if": {
+                "paid": true
+              },
+              "next": "end_paid"
+            },
+            {
+              "if": {
+                "otUnverified": true
+              },
+              "next": "end_ot"
+            },
+            {
+              "if": {
+                "claimedOutageOnly": true
+              },
+              "next": "end_fallout"
+            },
+            {
+              "else": "end_restored"
+            }
+          ],
+          "debrief": {
+            "whyItMatters": "Fixing only the entry point leaves untested backups, a weak IT/OT boundary and no plan.",
+            "betterPractice": "Address root causes across Govern, Identify, Protect and Recover.",
+            "referenceIds": [
+              "cisa-cpg",
+              "nist-csf2"
+            ]
+          }
+        },
+        {
+          "id": "blame_contractor",
+          "label": "Blame the contractor who installed the link and move on",
+          "hint": "It was their design.",
+          "csf": "GV",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "trust": -3,
+            "legal": 4
+          },
+          "next": [
+            {
+              "if": {
+                "paid": true
+              },
+              "next": "end_paid"
+            },
+            {
+              "if": {
+                "otUnverified": true
+              },
+              "next": "end_ot"
+            },
+            {
+              "if": {
+                "claimedOutageOnly": true
+              },
+              "next": "end_fallout"
+            },
+            {
+              "else": "end_restored"
+            }
+          ],
+          "debrief": {
+            "whyItMatters": "The city owned the risk. Blaming a vendor doesn't fund segmentation, testing or drills.",
+            "betterPractice": "Own the risk, then fix contracts and architecture together.",
+            "referenceIds": [
+              "nist-csf2"
+            ]
+          }
+        }
+      ]
+    },
+    "end_restored": {
+      "title": "Safe water, slow recovery",
+      "clockAdvance": 24,
+      "narrative": "The plant never stopped producing safe water. Billing came back slowly from tape or a new platform. The city did not pay.",
+      "ending": true,
+      "outcome": "Recovered without paying",
+      "summary": "Millbrook kept the plant safe and recovered its own systems. The tape restore was the slowest part, which is the recovery lesson: an untested backup is a hope, not a plan."
+    },
+    "end_paid": {
+      "title": "Public money, public record",
+      "clockAdvance": 24,
+      "narrative": "The payment is in the budget documents and the local paper. The decryptor helped a little. The stolen records turned up on a forum anyway.",
+      "ending": true,
+      "outcome": "Paid the ransom",
+      "summary": "Paying with public money didn't buy certainty: partial decryption, data leaked anyway, and a council vote that will follow the city for years."
+    },
+    "end_ot": {
+      "title": "One step from the controls",
+      "clockAdvance": 24,
+      "effects": {
+        "trust": -8,
+        "legal": 10
+      },
+      "narrative": "Months later a state audit revealed that the attackers had reached the engineering jump host next to the plant's controls, and that nobody had ever checked the controllers.",
+      "ending": true,
+      "outcome": "The unanswered OT question",
+      "summary": "IT recovered, but the city never verified the plant. Residents learned from an audit, not from the city, that the attackers had been one step from their water."
+    },
+    "end_fallout": {
+      "title": "The records request",
+      "clockAdvance": 24,
+      "effects": {
+        "trust": -6,
+        "legal": 12,
+        "cost": 20000
+      },
+      "narrative": "An open-records request surfaced internal emails about stolen data and the jump host, weeks after the city called it an 'IT outage'.",
+      "ending": true,
+      "outcome": "Public records, public anger",
+      "summary": "The recovery worked, but minimizing the incident in public cost the city more trust than the attack did."
+    }
+  },
+  "injects": [
+    {
+      "id": "historian",
+      "atHour": 1,
+      "if": {
+        "otConnected": true,
+        "otFiltered": false
+      },
+      "message": {
+        "from": "Treatment plant control room",
+        "channel": "phone",
+        "body": "HMI 2 just threw a login prompt we've never seen, then went back to normal. Probably nothing? Reporting it anyway."
+      },
+      "effects": {
+        "legal": 4,
+        "trust": -2
+      },
+      "setFlags": {
+        "otScare": true
+      }
+    },
+    {
+      "id": "forced_cut",
+      "atHour": 0,
+      "if": {
+        "otConnected": true,
+        "knowsJumpHost": true
+      },
+      "message": {
+        "from": "Federal assessment team lead",
+        "channel": "phone",
+        "body": "We see probing from the domain through your filtered link toward the jump host as recently as last night. We need the IT/OT link physically disconnected now, before we can verify the controllers. Your operators will have to go manual, starting today."
+      },
+      "effects": {
+        "cost": 30000,
+        "legal": 6,
+        "trust": -4
+      },
+      "setFlags": {
+        "manualOps": true,
+        "otIsolated": true,
+        "otConnected": false,
+        "fatigue": true
+      }
+    },
+    {
+      "id": "dir_missed",
+      "atHour": 48,
+      "if": {
+        "notifiedDIR": false
+      },
+      "message": {
+        "from": "City Attorney's Office",
+        "channel": "email",
+        "subject": "State reporting deadline",
+        "body": "Did anyone file the security-incident report with DIR? State law requires local governments to report ransomware within 48 hours of discovery. We're past it. Filing now; we'll need to explain the delay."
+      },
+      "effects": {
+        "legal": 8
+      },
+      "setFlags": {
+        "notifiedDIR": true,
+        "notifiedLegal": true
+      }
+    },
+    {
+      "id": "fatigue_nearmiss",
+      "atHour": 40,
+      "if": {
+        "fatigue": true
+      },
+      "message": {
+        "from": "Ray Delgado, Plant Superintendent",
+        "channel": "phone",
+        "body": "Close call. An operator on hour fifteen misread a chlorine residual and nearly overfed. Caught it on the next check, no harm to the water. But I'm out of people."
+      },
+      "effects": {
+        "trust": -4,
+        "legal": 6,
+        "cost": 15000
+      },
+      "setFlags": {
+        "mutualAid": true
+      }
+    },
+    {
+      "id": "residents",
+      "atHour": 26,
+      "if": {
+        "notifiedPublic": false
+      },
+      "message": {
+        "from": "Millbrook Ledger (fictional newspaper)",
+        "channel": "news",
+        "subject": "City silent as Millbrook billing outage enters day two",
+        "body": "Residents report they cannot pay water bills online. A city spokesperson did not respond to questions about whether the outage is a cyberattack."
+      },
+      "effects": {
+        "trust": -3
+      }
+    },
+    {
+      "id": "leak",
+      "atHour": 60,
+      "if": {
+        "dataExfiltrated": true,
+        "paid": false
+      },
+      "message": {
+        "from": "Gray Meridian · leak site",
+        "channel": "portal",
+        "subject": "CITY OF MILLBROOK: data published in 72h",
+        "body": "Customer IDs, employee SSNs, internal emails. Sample: 50 records. The city chose not to protect you."
+      },
+      "effects": {
+        "trust": -8,
+        "legal": 8
+      },
+      "setFlags": {
+        "confirmedExfil": true,
+        "leakPosted": true
+      }
+    },
+    {
+      "id": "tape_failure",
+      "atHour": 0,
+      "if": {
+        "tapeRestoreStarted": true,
+        "testedTapes": false
+      },
+      "message": {
+        "from": "Kevin Marsh, City IT Technician",
+        "channel": "text",
+        "body": "Bad news. Tapes 9, 14 and 22 won't read and the drive keeps faulting. We have to rebuild some data from older sets. This adds at least another week."
+      },
+      "effects": {
+        "downtime": 120,
+        "cost": 25000,
+        "dataLoss": 8
+      },
+      "setFlags": {
+        "tapeSurprise": true
+      }
+    },
+    {
+      "id": "broken_promise",
+      "atHour": 0,
+      "if": {
+        "tapeSurprise": true,
+        "promisedFriday": true
+      },
+      "message": {
+        "from": "Millbrook Ledger (fictional newspaper)",
+        "channel": "news",
+        "subject": "City misses its own deadline as billing outage drags on",
+        "body": "City officials had said billing would be restored by Friday. On Monday, residents still could not pay."
+      },
+      "effects": {
+        "trust": -6
+      }
+    },
+    {
+      "id": "records_request",
+      "atHour": 0,
+      "if": {
+        "paid": true,
+        "councilBriefed": true
+      },
+      "message": {
+        "from": "Millbrook Ledger (fictional newspaper)",
+        "channel": "news",
+        "subject": "Records show council approved $600,000 ransom payment",
+        "body": "Documents obtained through an open-records request show the Millbrook City Council approved payment to the criminal group in a closed session."
+      },
+      "effects": {
+        "trust": -10,
+        "legal": 4
+      }
+    },
+    {
+      "id": "resale",
+      "atHour": 150,
+      "if": {
+        "paid": true,
+        "dataExfiltrated": true
+      },
+      "message": {
+        "from": "Federal partner advisory (via FBI liaison)",
+        "channel": "email",
+        "subject": "Data listed for sale",
+        "body": "A dataset matching City of Millbrook HR and customer files has been listed on a criminal forum, despite the payment."
+      },
+      "effects": {
+        "trust": -6,
+        "legal": 6
+      },
+      "setFlags": {
+        "confirmedExfil": true,
+        "leakPosted": true
+      }
+    },
+    {
+      "id": "outage_contradicted",
+      "atHour": 0,
+      "if": {
+        "claimedOutageOnly": true,
+        "leakPosted": true
+      },
+      "message": {
+        "from": "Millbrook Ledger (fictional newspaper)",
+        "channel": "news",
+        "subject": "'IT outage' was a ransomware attack; resident data posted online",
+        "body": "The city described the incident as an IT outage. A criminal group has now posted residents' data and claims it reached the water plant's network."
+      },
+      "effects": {
+        "trust": -10,
+        "legal": 6
+      }
+    },
+    {
+      "id": "manual_bill",
+      "atHour": 200,
+      "if": {
+        "manualOps": true
+      },
+      "message": {
+        "from": "City Finance Department",
+        "channel": "email",
+        "subject": "Overtime: plant manual operations",
+        "body": "Overtime and mutual-aid invoices for manual plant operation are in. Please confirm the emergency budget line."
+      },
+      "effects": {
+        "cost": 55000
+      }
+    }
+  ],
+  "benchmark": {
+    "ending": "end_restored",
+    "outcome": "Recovered without paying",
+    "meters": {
+      "cost": 254000,
+      "downtime": 162,
+      "dataLoss": 6,
+      "trust": 81,
+      "legal": 0
+    },
+    "total": 85.8,
+    "grade": "A",
+    "path": [
+      "w01_alarm:isolate_it",
+      "w02_otlink:cut_ot",
+      "w03_manual:mutual_aid",
+      "w04_citymgr:activate_eoc",
+      "w05_help:call_cisa",
+      "w06_assessment:segment_now",
+      "w08_tapes:test_tapes",
+      "w09_council:ask_authority",
+      "w09b_pay:withdraw",
+      "w10_public:joint_statement",
+      "w11_notify:notify_all",
+      "w12_restore:tape_priority",
+      "w13_ot:reconnect_segmented",
+      "w14_lessons:aar_fund"
+    ]
+  }
+}

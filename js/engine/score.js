@@ -7,10 +7,10 @@ import { METERS, CSF_FUNCTIONS } from './state.js';
 export const WEIGHTS = { cost: 20, downtime: 25, dataLoss: 20, trust: 15, legal: 20 };
 
 export const GRADE_BANDS = [
-  { grade: 'A', min: 85 },
-  { grade: 'B', min: 72 },
-  { grade: 'C', min: 60 },
-  { grade: 'D', min: 48 },
+  { grade: 'A', min: 82 },
+  { grade: 'B', min: 70 },
+  { grade: 'C', min: 58 },
+  { grade: 'D', min: 46 },
   { grade: 'F', min: 0 },
 ];
 

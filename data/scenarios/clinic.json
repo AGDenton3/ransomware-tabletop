@@ -285,7 +285,7 @@
           "from": "EHR server (automated alert)",
           "channel": "email",
           "subject": "Database service stopped",
-          "body": "The service 'ChartStore' stopped unexpectedly at 07:31. 1,218 files in D:\\ChartStore\\data could not be opened."
+          "body": "The service 'Chartgrove' stopped unexpectedly at 07:31. 1,218 files in D:\\Chartgrove\\data could not be opened."
         }
       ],
       "narrative": "You walk to the front desk. Three screens show the same black page: your files are encrypted, contact us through this portal. File names on the shared drive now end in .qhc. The waiting room is filling up, and the first appointment is at 8:00.\n\nWhatever is doing this may still be running. What is your first move?",
@@ -516,7 +516,7 @@
           "keyGroup": "insurer",
           "effects": {
             "cost": 10000,
-            "legal": -5
+            "legal": -3
           },
           "setFlags": {
             "calledInsurer": true,
@@ -673,7 +673,7 @@
       },
       "inbox": [
         {
-          "from": "Kestrel Point Incident Response (panel firm)",
+          "from": "Kestrel Point Incident Response (fictional panel firm)",
           "channel": "email",
           "subject": "Preliminary findings, privileged and confidential",
           "body": "1) Initial access: the account 'fd-remote' logged in through the remote-access gateway nine days ago, from overseas IP addresses. The account had no MFA.\n2) The actor created a domain admin account and disabled antivirus on six servers.\n3) Exfiltration: about 38 GB went out to a file-sharing service two days ago, including EHR exports and billing files.\n4) Encryption began at 03:10 this morning."
@@ -985,7 +985,7 @@
       "clockAdvance": 4,
       "inbox": [
         {
-          "from": "Vaultline Cloud Backup Support",
+          "from": "Nimbuskeep Cloud Backup Support (fictional)",
           "channel": "email",
           "subject": "Ticket #88213: restore options",
           "body": "Your most recent weekly snapshot (Sunday 01:00) is intact and was not modified. Full restore of 1.9 TB: about 30 hours of transfer. We can ship an encrypted drive overnight if faster."
@@ -1177,7 +1177,7 @@
           "keyGroup": "lawEnforcement",
           "effects": {
             "cost": 8000,
-            "legal": -8
+            "legal": -5
           },
           "setFlags": {
             "notifiedFBI": true,
@@ -1429,7 +1429,7 @@
       "clockAdvance": 6,
       "inbox": [
         {
-          "from": "ChartStore EHR Vendor Support",
+          "from": "Chartgrove EHR Vendor Support (fictional)",
           "channel": "email",
           "subject": "Re: data recovery",
           "body": "We don't hold your data. Your contract is on-premises. We can reinstall a blank system and import whatever exports you have."
@@ -1516,7 +1516,7 @@
           "keyGroup": "notify",
           "effects": {
             "cost": 25000,
-            "legal": -15,
+            "legal": -8,
             "trust": 3
           },
           "setFlags": {
@@ -1589,7 +1589,7 @@
       "clockAdvance": 3,
       "inbox": [
         {
-          "from": "Dana Whitfield, Brazos Courier",
+          "from": "Dana Whitfield, Brazos County Ledger",
           "channel": "phone",
           "body": "Hi, I'm working on a story about the clinic being closed. Patients are telling me their appointments were cancelled, and someone sent me a screenshot of a site claiming to have your patient records. Can you confirm a cyberattack? I'm filing at 5."
         }
@@ -1886,7 +1886,7 @@
           "effects": {
             "cost": 30000,
             "trust": 4,
-            "legal": -5
+            "legal": -2
           },
           "setFlags": {
             "lessonsLearned": true
@@ -2233,7 +2233,7 @@
         "notifiedPublic": false
       },
       "message": {
-        "from": "Dana Whitfield, Brazos Courier",
+        "from": "Dana Whitfield, Brazos County Ledger",
         "channel": "text",
         "body": "Hi, Dana from the Courier. Several patients say the clinic is closed and mention a hacking group's website. Can you call me back today?"
       },
@@ -2294,7 +2294,7 @@
         "leakPosted": true
       },
       "message": {
-        "from": "Brazos Courier",
+        "from": "Brazos County Ledger",
         "channel": "news",
         "subject": "Clinic said no patient data was involved. Records posted online say otherwise.",
         "body": "Patients of Brazos Valley Family Clinic say they found their own records on a criminal leak site, days after the clinic described the incident as a 'technical outage'."
@@ -2328,6 +2328,34 @@
       "keptOpen",
       "claimedNoBreach",
       "misleadingStatement"
+    ]
+  },
+  "benchmark": {
+    "ending": "end_recovered",
+    "outcome": "Recovered without paying",
+    "meters": {
+      "cost": 184000,
+      "downtime": 79,
+      "dataLoss": 6,
+      "trust": 76,
+      "legal": 0
+    },
+    "total": 86.3,
+    "grade": "A",
+    "path": [
+      "n01_frontdesk:isolate_now",
+      "n02_owner:hold_isolation",
+      "n03_callwho:call_insurer",
+      "n04_scope:ir_forensics",
+      "n05_findings:full_reset",
+      "n06_backups:check_nas",
+      "n06b_nas_gone:ask_cloud",
+      "n07_restoreplan:restore_inplace",
+      "n09_notify:notify_properly",
+      "n10_media:honest_statement",
+      "n11_recovery:phased",
+      "n12_staff:brief_staff",
+      "n13_lessons:after_action"
     ]
   }
 }
