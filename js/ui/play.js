@@ -135,11 +135,16 @@ function announce(deltas, newMessages) {
 }
 
 // ---------------------------------------------------------------- render
+let lastClockText = '';
 function render(deltas, first = false) {
   const node = scenario.nodes[state.nodeId];
-  $('clock').textContent = formatClock(scenario, state.clock);
+  const clockText = formatClock(scenario, state.clock);
+  if (lastClockText && clockText !== lastClockText) { const c = $('clock'); c.classList.remove('tick'); void c.offsetWidth; c.classList.add('tick'); }
+  lastClockText = clockText;
+  $('clock').textContent = clockText;
   $('clock').setAttribute('aria-label', `In-game time: ${formatClock(scenario, state.clock)}`);
   updateMeters(deltas);
+  if (!first) feedback(deltas);
   const count = renderInbox(node);
   renderBoard();
   if (!first) announce(deltas, count);
@@ -164,7 +169,7 @@ function renderInbox(node) {
     ? msgs.map((m, i) => `
       <article class="msg msg-${esc(m.channel)} is-new${m.isInject ? ' msg-inject' : ''}" style="animation-delay:${reducedMotion ? 0 : i * 280}ms" aria-label="${esc(label[m.channel])} from ${esc(m.from)}">
         <div class="msg-head"><span class="msg-channel">${label[m.channel]}</span><span class="msg-from">${esc(m.from)}</span><span class="msg-time">${esc(time)}</span></div>
-        ${m.isInject ? '<p class="msg-tag" style="padding:.5rem .9rem 0;margin:0">NEW DEVELOPMENT</p>' : ''}
+        ${m.isInject ? '<p class="msg-tag">NEW DEVELOPMENT</p>' : ''}
         ${m.subject ? `<p class="msg-subject">${esc(m.subject)}</p>` : ''}
         <div class="msg-body">${esc(m.body)}</div>
       </article>`).join('')
@@ -172,19 +177,22 @@ function renderInbox(node) {
   return msgs.length;
 }
 
+const boardMemory = {};
 function renderBoard() {
   const b = scenario.board || {};
   const rows = (b.items || []).map((item) => {
     const hit = (item.states || []).find((s) => matches(s.if, state));
     const text = hit ? hit.text : item.default || 'Unknown';
     const tone = hit ? hit.tone || '' : 'unknown';
-    return `<div class="row"><dt>${esc(item.label)}</dt><dd data-tone="${esc(tone)}">${esc(text)}</dd></div>`;
+    const changed = boardMemory[item.label] !== undefined && boardMemory[item.label] !== text;
+    boardMemory[item.label] = text;
+    return `<div class="row"><dt>${esc(item.label)}</dt><dd data-tone="${esc(tone)}"${changed ? ' class="changed"' : ''}>${esc(text)}</dd></div>`;
   });
   if (b.notifications?.length) {
     const items = b.notifications.map((n) => {
       const done = state.flags[n.flag];
       const when = done && state.flagTimes[n.flag] !== undefined ? formatClock(scenario, state.flagTimes[n.flag]) : '';
-      return `<li><span>${esc(n.label)}</span>${done ? `<span class="yes">Notified${when ? ` · ${esc(when.replace('Day ', 'D'))}` : ''}</span>` : '<span class="no">Not yet</span>'}</li>`;
+      return `<li><span>${esc(n.label)}</span>${done ? `<span class="yes"><span aria-hidden="true">✓ </span><span class="sr-only">Notified </span>${when ? esc(when.replace('Day ', 'D')) : 'Yes'}</span>` : '<span class="no">Not yet</span>'}</li>`;
     }).join('');
     rows.push(`<div class="row"><dt>Who has been told</dt><dd><ul class="notify-list">${items}</ul></dd></div>`);
   }
@@ -244,9 +252,29 @@ function step(choiceId) {
   return deltas;
 }
 
+let busy = false;
 function pick(choiceId) {
   if (PRESENT) return presentPick(choiceId);
-  render(step(choiceId));
+  if (busy) return;
+  busy = true;
+  // Stamp the chosen tile, then move on.
+  const btn = document.querySelector(`#choices-area .choice[data-choice="${CSS.escape(choiceId)}"]`);
+  btn?.classList.add('is-chosen');
+  btn?.closest('.choices')?.classList.add('is-locked');
+  setTimeout(() => { busy = false; render(step(choiceId)); }, reducedMotion ? 0 : 420);
+}
+
+/** Big bad deltas make the room shake (skipped with reduced motion). */
+function feedback(deltas) {
+  if (!deltas) return;
+  const hurt = METERS.filter((k) => deltas[k] && !isGood(k, deltas[k]));
+  hurt.forEach((k) => { const m = $(`meter-${k}`); m.classList.remove('hit'); void m.offsetWidth; m.classList.add('hit'); });
+  const severe = (deltas.cost || 0) >= 30000 || (deltas.downtime || 0) >= 24 || (deltas.dataLoss || 0) >= 8 || (deltas.trust || 0) <= -6 || (deltas.legal || 0) >= 8;
+  if (severe && !reducedMotion) {
+    document.body.classList.remove('jolt'); void document.body.offsetWidth;
+    document.body.classList.add('jolt');
+    setTimeout(() => document.body.classList.remove('jolt'), 900);
+  }
 }
 
 function onKey(e) {
@@ -311,6 +339,7 @@ function reveal(choice) {
   const before = state.history.length;
   const deltas = step(choice.id);
   updateMeters(deltas);
+  feedback(deltas);
   announce(deltas, 0);
   const events = state.history.slice(before).filter((e) => e.type === 'inject').length;
   const bar = document.querySelector('.present-bar');

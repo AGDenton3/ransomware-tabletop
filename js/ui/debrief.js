@@ -47,7 +47,7 @@ async function boot() {
 function header(scenario, r, state) {
   const e = r.ending || { outcome: 'Unfinished run', summary: '' };
   return `
-  <section class="card" aria-labelledby="outcome-title">
+  <section class="outcome-card" aria-labelledby="outcome-title">
     <div class="outcome-head">
       <div>
         <p class="eyebrow">Debrief · ${esc(scenario.title)}</p>
@@ -78,7 +78,7 @@ function compare(scenario, r) {
   const bands = GRADE_BANDS.filter((b) => b.grade !== 'F').map((b) => `${b.grade} ≥ ${b.min}`).join(' · ');
   return `
   <section class="section" aria-labelledby="meters-title">
-    <h2 id="meters-title">Your meters vs. the <em>best run</em></h2>
+    <div class="section-head"><h2 id="meters-title">You vs. the <em>best run</em></h2></div>
     <p class="muted">“Best run” is the highest-scoring of every possible path through this scenario (${esc(bench?.outcome || 'n/a')}, grade ${esc(bench?.grade || '—')}), found by playing every path automatically.</p>
     <div class="table-scroll card">
       <table class="data">
@@ -132,7 +132,7 @@ function timeline(scenario, state, refs) {
   }).join('');
   return `
   <section class="section" aria-labelledby="timeline-title">
-    <h2 id="timeline-title">Decision <em>timeline</em></h2>
+    <div class="section-head"><h2 id="timeline-title">Decision <em>timeline</em></h2><span class="count" aria-hidden="true">${String(state.history.filter((e) => e.type === 'choice').length).padStart(2, '0')}</span></div>
     <p class="muted">Each decision with its time, NIST CSF 2.0 Function, legacy SP 800-61 Rev. 2 phase, and meter changes. Filled markers are events you didn't choose.</p>
     <ol class="timeline">${items}</ol>
   </section>`;
@@ -157,7 +157,7 @@ function csfSection(r) {
   const table = codes.map((c) => `<tr><th scope="row">${c} ${esc(CSF_FUNCTIONS[c].name)}</th><td class="num">${r.csfCounts[c]}</td></tr>`).join('');
   return `
   <section class="section" aria-labelledby="csf-title">
-    <h2 id="csf-title">Your response by <em>NIST function</em></h2>
+    <div class="section-head"><h2 id="csf-title">Your response by <em>NIST function</em></h2></div>
     <div class="grid grid-2">
       <div class="card">
         <svg class="csf-chart" viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="csf-svg-title">
@@ -177,12 +177,12 @@ function csfSection(r) {
 // 4. missed opportunities -----------------------------------------------------------
 function missed(scenario, r, refs) {
   if (!r.missed.length) {
-    return `<section class="section" aria-labelledby="missed-title"><h2 id="missed-title">Missed <em>opportunities</em></h2>
+    return `<section class="section" aria-labelledby="missed-title"><div class="section-head"><h2 id="missed-title">Missed <em>opportunities</em></h2><span class="count" aria-hidden="true">00</span></div>
       <div class="callout"><p>You took every key decision that was offered to you. Well run.</p></div></section>`;
   }
   return `
   <section class="section" aria-labelledby="missed-title">
-    <h2 id="missed-title">Missed <em>opportunities</em></h2>
+    <div class="section-head"><h2 id="missed-title">Missed <em>opportunities</em></h2><span class="count" aria-hidden="true">${String(r.missed.length).padStart(2, '0')}</span></div>
     <p class="muted">Key decisions that were on the table but that you didn't take.</p>
     <div class="grid">
       ${r.missed.map((m) => `
@@ -203,7 +203,7 @@ function preparation(scenario) {
   if (!facts.length) return '';
   return `
   <section class="section" aria-labelledby="prep-title">
-    <h2 id="prep-title">Preparation would have <em>changed this</em></h2>
+    <div class="section-head"><h2 id="prep-title">Preparation would have <em>changed this</em></h2></div>
     <p class="muted">What was true all along, and the pre-incident measure that would have defused it.</p>
     <div class="grid grid-2">
       ${facts.map((f) => `

@@ -9,7 +9,7 @@
   <meta property="og:title" content="Ransomware Tabletop">
   <meta property="og:description" content="It's 7:42 a.m. The screens say your files are encrypted. Make the calls, then see how your response maps to NIST.">
   <meta property="og:url" content="https://agdenton3.github.io/ransomware-tabletop/">
-  <meta name="theme-color" content="#500000">
+  <meta name="theme-color" content="#A10006">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/styles.css">
   <script type="module" src="js/ui/home.js"></script>
@@ -29,39 +29,58 @@
   </header>
 
   <main id="main">
-    <section class="hero">
-      <div class="wrap">
-        <p class="eyebrow">CSCE 477 · Incident response exercise</p>
-        <h1>It's 7:42 a.m. The screens say your files are <em>encrypted</em>.</h1>
-        <p class="lede">You are the IT lead at a small organization with no security team, and a ransom note has just appeared. Every call you make costs money, time, data or trust, and the clock keeps moving whether you decide or not. At the end, a debrief maps each of your decisions to the NIST incident-response framework.</p>
-        <div class="btn-row">
-          <a class="btn" href="#scenarios">Choose a scenario</a>
-          <a class="btn btn-secondary" href="learn.html">How NIST frames incident response</a>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-grid">
+        <div>
+          <p class="eyebrow">Incident 0742 · CSCE 477 tabletop</p>
+          <h1 id="hero-title" aria-label="It's 7:42 a.m. The screens say your files are encrypted.">It's 7:42 a.m.<br>The screens say your files are <span class="redact" id="scramble" aria-hidden="true">encrypted</span></h1>
+          <p class="lede">You're the IT lead at a small organization with no security team. A ransom note just appeared. Every call costs money, hours, data or trust, and the clock doesn't wait for you.</p>
+          <div class="btn-row">
+            <a class="btn" href="#scenarios">Open a case file</a>
+            <a class="btn btn-secondary" href="learn.html">How NIST frames it</a>
+          </div>
         </div>
+        <aside class="hero-console" aria-label="Simulated incident status">
+          <div class="row"><span>Local time</span><span class="ok">● Live</span></div>
+          <div class="row" style="display:block"><span>Clinic front desk</span><span class="big" id="hero-clock">07:42:00</span></div>
+          <div class="row" style="display:block"><span class="warn">Ransom deadline</span><span class="big warn" id="hero-deadline">71:59:59</span></div>
+          <div class="row"><span>Files encrypted</span><span class="warn" id="hero-files">1,218</span></div>
+          <div class="row"><span>Status</span><span class="warn"><span class="blink">■</span> Awaiting your call</span></div>
+        </aside>
       </div>
     </section>
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track" id="ticker">
+        <span>Brazos Valley clinic cancels morning appointments</span>
+        <span>Leak site claims 38 GB of patient files</span>
+        <span>Millbrook water plant switches to manual operation</span>
+        <span>City council called into emergency session</span>
+        <span>Residents ask: is the water safe?</span>
+        <span>Backup tapes untested for 18 months</span>
+        <span>Attacker portal: “Price doubles in 72 hours”</span>
+        <span>All organizations in this exercise are fictional</span>
+      </div>
+    </div>
 
     <section class="section" aria-labelledby="how">
       <div class="wrap">
-        <p class="eyebrow">How to play</p>
-        <h2 id="how">Four steps, about <em>fifteen minutes</em></h2>
+        <div class="section-head"><h2 id="how">How it <em>works</em></h2><span class="count" aria-hidden="true">≈15 min</span></div>
         <ol class="steps">
-          <li><strong>Pick an organization</strong>Each scenario has its own systems, backups, insurance and legal duties. Open the org profile any time.</li>
-          <li><strong>Read the inbox</strong>Emails, calls and texts arrive as the clock moves. Some bring facts; some bring pressure.</li>
-          <li><strong>Make the call</strong>Choose with the mouse or keys <kbd>1</kbd>–<kbd>4</kbd>. Watch the five meters: Cost, Downtime, Data Loss, Public Trust and Legal Exposure.</li>
-          <li><strong>Read the debrief</strong>See your grade, every decision tagged by NIST CSF 2.0 Function, what you missed, and what preparation would have changed.</li>
+          <li><strong>Open a case file</strong>Each organization has its own systems, backups, insurance and legal duties. The org profile is always one click away.</li>
+          <li><strong>Read the inbox</strong>Emails, calls, texts and the attacker's portal arrive as the clock moves. Some bring facts. Some bring pressure.</li>
+          <li><strong>Make the call</strong>Click or press <kbd>1</kbd>–<kbd>4</kbd>. Five meters react: Cost, Downtime, Data Loss, Public Trust, Legal Exposure.</li>
+          <li><strong>Face the debrief</strong>A stamped grade, every decision mapped to NIST CSF 2.0, what you missed, and what preparation would have changed.</li>
         </ol>
       </div>
     </section>
 
     <section class="section" id="scenarios" aria-labelledby="pick" tabindex="-1">
       <div class="wrap">
-        <p class="eyebrow">Scenarios</p>
-        <h2 id="pick">Choose your <em>morning</em></h2>
-        <div class="grid grid-2" id="scenario-list" aria-live="polite">
+        <div class="section-head"><h2 id="pick">Case <em>files</em></h2><span class="count" aria-hidden="true">02</span></div>
+        <div class="case-files" id="scenario-list">
           <p class="muted">Loading scenarios…</p>
         </div>
-        <p class="muted" style="margin-top:1rem">Running a class session? Add presentation mode from any scenario card: large text, A/B/C/D choices for a show-of-hands vote, and a reveal step after each decision.</p>
+        <p class="muted" style="margin-top:2.2rem">Running it for a class? <strong>Presentation mode</strong> gives big text, A–D choices for a show-of-hands vote, a dramatic reveal after each decision, and an optional vote timer.</p>
       </div>
     </section>
   </main>

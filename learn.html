@@ -9,7 +9,7 @@
   <meta property="og:title" content="Learn · Ransomware Tabletop">
   <meta property="og:description" content="How NIST frames incident response, whether to pay, and what to do before an incident.">
   <meta property="og:url" content="https://agdenton3.github.io/ransomware-tabletop/learn.html">
-  <meta name="theme-color" content="#500000">
+  <meta name="theme-color" content="#A10006">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/styles.css">
   <script type="module" src="js/ui/learn.js"></script>
@@ -32,14 +32,14 @@
     <section class="hero">
       <div class="wrap">
         <p class="eyebrow">Learn</p>
-        <h1>The framework behind the <em>game</em></h1>
+        <h1>The framework<br>behind the game</h1>
         <p class="lede">Every decision in the game is tagged with a NIST Cybersecurity Framework 2.0 Function, following NIST SP 800-61 Rev. 3. Here is what that means, how it differs from the older lifecycle, and the sources behind every real-world claim in the game.</p>
-        <nav aria-label="On this page" class="btn-row">
-          <a class="btn btn-ghost" href="#nist">NIST SP 800-61 Rev. 3</a>
-          <a class="btn btn-ghost" href="#rev2">Rev. 2 vs. Rev. 3</a>
-          <a class="btn btn-ghost" href="#pay">Should you pay?</a>
-          <a class="btn btn-ghost" href="#checklist">Before an incident</a>
-          <a class="btn btn-ghost" href="#references">References</a>
+        <nav aria-label="On this page" class="toc">
+          <a href="#nist">NIST Rev. 3</a>
+          <a href="#rev2">Rev. 2 vs. Rev. 3</a>
+          <a href="#pay">Should you pay?</a>
+          <a href="#checklist">Before an incident</a>
+          <a href="#references">References</a>
         </nav>
       </div>
     </section>
@@ -47,7 +47,7 @@
     <section class="section" id="nist" aria-labelledby="nist-title">
       <div class="wrap stack">
         <p class="eyebrow">NIST SP 800-61 Rev. 3 (April 2025)</p>
-        <h2 id="nist-title">Incident response as part of <em>managing risk</em></h2>
+        <div class="section-head"><h2 id="nist-title">Incident response as part of <em>managing risk</em></h2><span class="count" aria-hidden="true">06</span></div>
         <p>NIST Special Publication 800-61 is the U.S. government's main guidance on incident response. Revision 3, published in April 2025, is written as a “Community Profile” of the NIST Cybersecurity Framework (CSF) 2.0. Instead of treating incident response as a separate checklist that starts when an alarm goes off, it describes incident response as part of an organization's everyday cybersecurity risk management, organized around the six CSF 2.0 Functions. <span class="refs-inline">[<a href="#ref-nist-sp800-61r3">NIST SP 800-61r3</a>; <a href="#ref-nist-csf2">NIST CSF 2.0</a>]</span></p>
         <div class="table-scroll card">
           <table class="data">
@@ -66,11 +66,21 @@
       </div>
     </section>
 
-    <section class="section" id="rev2" aria-labelledby="rev2-title" style="background:var(--surface)">
+    <section class="section band" id="rev2" aria-labelledby="rev2-title">
       <div class="wrap stack">
         <p class="eyebrow">What changed</p>
-        <h2 id="rev2-title">From a four-phase cycle to <em>six Functions</em></h2>
+        <div class="section-head"><h2 id="rev2-title">From a four-phase cycle to <em>six Functions</em></h2></div>
         <p>Revision 2 (2012) described a four-phase incident response lifecycle. Many courses and playbooks still use it, so the game shows each decision's Rev. 2 phase as a secondary label. <span class="refs-inline">[<a href="#ref-nist-sp800-61r2">NIST SP 800-61r2</a>]</span></p>
+        <div class="lifecycle-wrap">
+          <div class="lifecycle" role="list" aria-label="CSF 2.0 Functions grouped as in Rev. 3">
+            <div class="pre" role="listitem"><span class="phase">Before an incident →</span><span class="code">GV</span><span class="name">Govern</span></div>
+            <div class="pre" role="listitem"><span class="code">ID</span><span class="name">Identify</span></div>
+            <div class="pre" role="listitem"><span class="code">PR</span><span class="name">Protect</span></div>
+            <div role="listitem"><span class="phase">During an incident →</span><span class="code" style="color:var(--accent)">DE</span><span class="name">Detect</span></div>
+            <div role="listitem"><span class="code" style="color:var(--accent)">RS</span><span class="name">Respond</span></div>
+            <div role="listitem"><span class="code" style="color:var(--accent)">RC</span><span class="name">Recover</span></div>
+          </div>
+        </div>
         <div class="grid grid-2">
           <div class="card">
             <h3>Rev. 2 (2012): lifecycle</h3>
@@ -97,9 +107,9 @@
     <section class="section" id="pay" aria-labelledby="pay-title">
       <div class="wrap stack">
         <p class="eyebrow">The hardest call</p>
-        <h2 id="pay-title">Should you <em>pay?</em></h2>
+        <div class="section-head"><h2 id="pay-title">Should you <em>pay?</em></h2><span class="count" aria-hidden="true">??</span></div>
         <p>The game doesn't give a verdict, and neither does this page. These are the considerations, each from a primary source. Decisions like this belong with leadership, counsel and law enforcement, not with the IT lead alone.</p>
-        <div class="grid grid-2">
+        <div class="grid grid-2 pay-grid">
           <article class="card">
             <h3>No guarantee of recovery</h3>
             <p>The FBI says it does not support paying a ransom, partly because paying does not guarantee an organization will get its data back. <span class="refs-inline">[<a href="#ref-fbi-ic3-ransomware">FBI IC3</a>]</span> In the game, paid decryptors are slow and partial.</p>
@@ -128,11 +138,12 @@
       </div>
     </section>
 
-    <section class="section" id="checklist" aria-labelledby="checklist-title" style="background:var(--surface)">
+    <section class="section band" id="checklist" aria-labelledby="checklist-title">
       <div class="wrap stack">
         <p class="eyebrow">Before an incident</p>
-        <h2 id="checklist-title">A checklist for <em>small organizations</em></h2>
+        <div class="section-head"><h2 id="checklist-title">A checklist for <em>small organizations</em></h2></div>
         <p class="muted">Tick off what your organization already has. Your ticks are saved only in this browser.</p>
+        <div class="check-progress" aria-live="polite"><span id="check-count">0 / 11 ready</span><div class="track" aria-hidden="true"><div class="fill" id="check-fill"></div></div></div>
         <ul class="checklist" id="checklist-list"></ul>
       </div>
     </section>
@@ -140,7 +151,7 @@
     <section class="section" id="references" aria-labelledby="refs-title" tabindex="-1">
       <div class="wrap stack">
         <p class="eyebrow">Sources</p>
-        <h2 id="refs-title"><em>References</em></h2>
+        <div class="section-head"><h2 id="refs-title">The <em>sources</em></h2></div>
         <p class="muted">Every real-world law, regulation, guidance document or statistic in the game cites one of these primary sources.</p>
         <ol class="ref-list" id="ref-list"><li class="muted">Loading references…</li></ol>
       </div>
