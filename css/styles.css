@@ -62,16 +62,7 @@
   color-scheme: light;
 }
 
-/* "after hours" */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: var(--chalk); --ink: var(--paper); --heading: var(--paper); --heading-shadow: var(--maroon);
-    --line: var(--grease); --rule: var(--maroon); --shadow: var(--sauce); --link: var(--sauce);
-    --card: var(--chalk); --alt: var(--maroon); --alt-ink: var(--paper);
-    --board: var(--maroon); --good-text: var(--sauce); --dots: var(--maroon); --wall: var(--chalk);
-    color-scheme: dark;
-  }
-}
+/* "after hours" (only when chosen with the toggle; Daytime is the default) */
 :root[data-theme="dark"] {
   --bg: var(--chalk); --ink: var(--paper); --heading: var(--paper); --heading-shadow: var(--maroon);
   --line: var(--grease); --rule: var(--maroon); --shadow: var(--sauce); --link: var(--sauce);
@@ -229,7 +220,6 @@ kbd { font: 500 .85em var(--font-mono); border: 2px solid var(--line); border-bo
 .hero .boomerang.b1 { left: -1.2rem; bottom: .4rem; transform: rotate(calc(-25deg * var(--tilt))); }
 .hero .boomerang.b2 { right: 34%; top: 1rem; width: 3.4rem; transform: rotate(calc(160deg * var(--tilt))); }
 [data-theme="dark"] .hero-sign h1, [data-theme="dark"] .hero .lede, [data-theme="dark"] .hero .eyebrow { color: var(--paper); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hero-sign h1, :root:not([data-theme="light"]) .hero .lede, :root:not([data-theme="light"]) .hero .eyebrow { color: var(--paper); } }
 
 /* tonight's damage board in the hero */
 .damage-board { margin-left: -2.5rem; z-index: 3; transform: rotate(calc(2deg * var(--tilt))); box-shadow: 8px 8px 0 var(--maroon); }

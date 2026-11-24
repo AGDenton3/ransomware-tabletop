@@ -40,7 +40,7 @@ CONTRAST RULES (measured): chalk/paper 13.73, maroon/paper 11.75, chalk/grease 9
 - Body text: chalk or maroon on paper, or paper on chalk/maroon.
 - Text on --fry or --sauce only if it is --chalk and at least 18px bold (or 24px).
 - Ketchup never carries small text; use it for fills, borders, markers, and 24px+ type.
-- Dark mode = "after hours": chalk background, paper text, sauce accents; the menu board turns maroon.
+- Daytime (light) is the default for everyone. "After hours" (dark: chalk background, paper text, sauce accents, maroon menu board) applies only when chosen with the header toggle.
 
 TYPE (self-hosted in assets/fonts with OFL licenses, loaded by @font-face; no CDNs):
 - Shrikhand: display headlines

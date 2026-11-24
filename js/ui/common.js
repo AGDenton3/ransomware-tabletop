@@ -105,7 +105,7 @@ export function initTheme() {
   if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
   const btn = document.querySelector('.theme-toggle');
   if (!btn) return;
-  const current = () => root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const current = () => (root.dataset.theme === 'dark' ? 'dark' : 'light'); // Daytime unless chosen
   const label = () => {
     const next = current() === 'dark' ? 'light' : 'dark';
     btn.textContent = next === 'dark' ? 'After hours' : 'Daytime';
