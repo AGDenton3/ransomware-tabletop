@@ -1,0 +1,2333 @@
+{
+  "id": "clinic",
+  "title": "Brazos Valley Family Clinic",
+  "orgType": "Healthcare · Outpatient clinic",
+  "difficulty": "Intermediate",
+  "estMinutes": 12,
+  "startTime": "07:42",
+  "orgProfile": {
+    "name": "Brazos Valley Family Clinic (fictional)",
+    "size": "40 staff · 6 physicians and NPs · one location · about 9,000 active patients",
+    "description": "A family-medicine practice seeing 120–140 patients a day. IT is you, plus a part-time contractor who set up remote access during the pandemic.",
+    "criticalSystems": [
+      "Electronic health records (EHR)",
+      "Scheduling",
+      "E-prescribing",
+      "Billing and claims",
+      "File server / NAS"
+    ],
+    "backups": "Nightly backup to a NAS on the same network, plus a weekly copy to a cloud backup service. Restores have never been tested end to end.",
+    "insurance": "Cyber insurance policy with a 24/7 breach hotline, panel incident-response firms and breach counsel. The policy asks for prompt notice.",
+    "regulatedData": [
+      "Protected health information (HIPAA)",
+      "Patient billing and insurance details",
+      "Texas residents' sensitive personal information"
+    ]
+  },
+  "ransomNote": {
+    "gang": "Quiet Harbor Collective",
+    "demand": "$450,000 in Bitcoin",
+    "deadlineHours": 72,
+    "text": "Your network is encrypted and your patient files are in our hands. Do not contact police or 'recovery companies'. Visit our portal with the key below to talk. After 72 hours the price doubles and your patients' records go public."
+  },
+  "startingMeters": {
+    "cost": 0,
+    "downtime": 0,
+    "dataLoss": 0,
+    "trust": 72,
+    "legal": 15
+  },
+  "scoring": {
+    "costBad": 1200000,
+    "downtimeBad": 336
+  },
+  "hiddenFacts": {
+    "initialAccessNoMfa": {
+      "value": true,
+      "label": "The attackers logged in through a remote-access account that had no multi-factor authentication",
+      "preparation": {
+        "measure": "Require MFA on every remote-access and email account",
+        "csf": "PR",
+        "detail": "A stolen password alone would not have been enough. CISA's baseline goals put phishing-resistant MFA on remote access near the top of the list."
+      }
+    },
+    "nasEncrypted": {
+      "value": true,
+      "label": "The nightly NAS backups sat on the same network and were encrypted with everything else",
+      "preparation": {
+        "measure": "Keep at least one offline or immutable backup and test restoring it",
+        "csf": "PR",
+        "detail": "A backup that the domain can reach is a backup the attacker can encrypt. Only the weekly cloud copy survived."
+      }
+    },
+    "cloudCopyIntact": {
+      "value": true,
+      "label": "The weekly cloud copy was intact, but only players who checked found out",
+      "preparation": {
+        "measure": "Document every backup location and who can restore from it",
+        "csf": "ID",
+        "detail": "An asset and backup inventory turns 'we think we have backups' into a one-call answer in the first hour."
+      }
+    },
+    "dataExfiltrated": {
+      "value": true,
+      "label": "About 38 GB of patient and billing files were copied out two days before encryption",
+      "preparation": {
+        "measure": "Monitor for unusual outbound transfers and keep logs long enough to investigate",
+        "csf": "DE",
+        "detail": "The upload ran for hours to a file-sharing service. Egress alerts would have caught double extortion before the encryption started."
+      }
+    },
+    "noIrPlan": {
+      "value": true,
+      "label": "There was no written, tested incident-response plan or call tree",
+      "preparation": {
+        "measure": "Write an incident-response plan, with the insurer hotline and decision-makers, and rehearse it yearly",
+        "csf": "GV",
+        "detail": "Most of the hard calls in this scenario (who decides, who to call, when to notify) can be settled before the incident."
+      }
+    }
+  },
+  "start": "n01_frontdesk",
+  "board": {
+    "items": [
+      {
+        "label": "Systems affected",
+        "states": [
+          {
+            "if": {
+              "recoveryDone": true
+            },
+            "text": "Restored and under monitoring",
+            "tone": "good"
+          },
+          {
+            "if": {
+              "spreadWider": true
+            },
+            "text": "EHR, scheduling, billing, NAS and 6 more servers",
+            "tone": "bad"
+          },
+          {
+            "if": {
+              "scoped": true
+            },
+            "text": "EHR, scheduling, e-prescribing, billing, NAS",
+            "tone": "bad"
+          }
+        ],
+        "default": "Unknown (front-desk PCs confirmed)"
+      },
+      {
+        "label": "Containment",
+        "states": [
+          {
+            "if": {
+              "isolated": true,
+              "keptOpen": false
+            },
+            "text": "Network isolated",
+            "tone": "good"
+          },
+          {
+            "if": {
+              "isolated": true,
+              "keptOpen": true,
+              "isolatedLate": false
+            },
+            "text": "EHR reconnected",
+            "tone": "bad"
+          },
+          {
+            "if": {
+              "isolated": true
+            },
+            "text": "Isolated (late)",
+            "tone": "warn"
+          },
+          {
+            "if": {
+              "keptOpen": true
+            },
+            "text": "Systems still connected",
+            "tone": "bad"
+          }
+        ],
+        "default": "Not contained"
+      },
+      {
+        "label": "How they got in",
+        "states": [
+          {
+            "if": {
+              "knowsInitialAccess": true,
+              "mfaEnforced": true
+            },
+            "text": "Remote-access account, now closed with MFA",
+            "tone": "good"
+          },
+          {
+            "if": {
+              "knowsInitialAccess": true
+            },
+            "text": "Remote-access account with no MFA",
+            "tone": "bad"
+          }
+        ],
+        "default": "Unknown"
+      },
+      {
+        "label": "Backup status",
+        "states": [
+          {
+            "if": {
+              "knowsCloudIntact": true
+            },
+            "text": "NAS encrypted; weekly cloud copy intact",
+            "tone": "warn"
+          },
+          {
+            "if": {
+              "knowsNasEncrypted": true
+            },
+            "text": "NAS encrypted; nothing else checked",
+            "tone": "bad"
+          }
+        ],
+        "default": "Unknown"
+      },
+      {
+        "label": "Data exfiltration",
+        "states": [
+          {
+            "if": {
+              "confirmedExfil": true
+            },
+            "text": "Confirmed (about 38 GB)",
+            "tone": "bad"
+          },
+          {
+            "if": {
+              "suspectExfil": true
+            },
+            "text": "Suspected",
+            "tone": "warn"
+          }
+        ],
+        "default": "Unknown"
+      },
+      {
+        "label": "Ransom",
+        "states": [
+          {
+            "if": {
+              "paid": true
+            },
+            "text": "Paid",
+            "tone": "bad"
+          },
+          {
+            "if": {
+              "refusedToPay": true
+            },
+            "text": "Declined",
+            "tone": "good"
+          },
+          {
+            "if": {
+              "negotiating": true
+            },
+            "text": "In contact with attackers",
+            "tone": "warn"
+          }
+        ],
+        "default": "No contact"
+      }
+    ],
+    "notifications": [
+      {
+        "flag": "notifiedLeadership",
+        "label": "Practice owner"
+      },
+      {
+        "flag": "notifiedLegal",
+        "label": "Legal counsel"
+      },
+      {
+        "flag": "calledInsurer",
+        "label": "Cyber insurer"
+      },
+      {
+        "flag": "notifiedFBI",
+        "label": "FBI / IC3"
+      },
+      {
+        "flag": "notifiedRegulators",
+        "label": "HHS and Texas AG"
+      },
+      {
+        "flag": "notifiedPublic",
+        "label": "Patients and public"
+      }
+    ]
+  },
+  "nodes": {
+    "n01_frontdesk": {
+      "title": "The charts won't open",
+      "clockAdvance": 0,
+      "inbox": [
+        {
+          "from": "Marisol, Front Desk",
+          "channel": "text",
+          "body": "None of the charts will open and the check-in screen has a weird black note on it. First patients are already in the lobby. Can you come??"
+        },
+        {
+          "from": "EHR server (automated alert)",
+          "channel": "email",
+          "subject": "Database service stopped",
+          "body": "The service 'ChartStore' stopped unexpectedly at 07:31. 1,218 files in D:\\ChartStore\\data could not be opened."
+        }
+      ],
+      "narrative": "You walk to the front desk. Three screens show the same black page: your files are encrypted, contact us through this portal. File names on the shared drive now end in .qhc. The waiting room is filling up, and the first appointment is at 8:00.\n\nWhatever is doing this may still be running. What is your first move?",
+      "choices": [
+        {
+          "id": "isolate_now",
+          "label": "Isolate now: unplug the affected machines and cut the network off from the internet",
+          "hint": "Stops the spread. The clinic goes to paper and some patients get rescheduled.",
+          "csf": "RS",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "keyDecision": true,
+          "keyGroup": "contain",
+          "effects": {
+            "downtime": 4,
+            "cost": 2000,
+            "trust": -2
+          },
+          "setFlags": {
+            "isolated": true
+          },
+          "next": "n02_owner",
+          "debrief": {
+            "whyItMatters": "Encryption keeps spreading for as long as infected machines can reach file shares and backups. Every minute connected widens what you will have to restore.",
+            "betterPractice": "Isolate affected systems first, by unplugging or disabling network access rather than powering off, so that memory evidence survives. Then work out the scope.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "partial_isolate",
+          "label": "Unplug just the three front-desk PCs and keep the EHR server running while you investigate",
+          "hint": "Doctors keep their charts for now, if the server is still clean.",
+          "csf": "RS",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "dataLoss": 8,
+            "downtime": 1
+          },
+          "setFlags": {
+            "keptOpen": true
+          },
+          "next": "n02_owner",
+          "debrief": {
+            "whyItMatters": "The EHR server was already reporting unreadable files. Partial containment based on where the symptoms showed up first leaves the real target connected.",
+            "betterPractice": "Assume the spread is wider than the first symptoms. Contain at the network level, then bring systems back one at a time once each is known to be clean.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "reboot",
+          "label": "Restart the affected machines and the EHR server to see if that clears it",
+          "hint": "It's what fixes most problems around here, and it takes ten minutes.",
+          "csf": "DE",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "dataLoss": 12,
+            "legal": 3,
+            "downtime": 1
+          },
+          "setFlags": {
+            "evidenceLost": true,
+            "keptOpen": true
+          },
+          "next": "n02_owner",
+          "debrief": {
+            "whyItMatters": "Restarting does not decrypt anything. It wipes memory that investigators use to find the attacker's tools and keys, and the systems stay on the network while they reboot.",
+            "betterPractice": "Do not reboot. Isolate the machines, and power them down only if you cannot disconnect them. Preserve evidence for the investigation.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "nist-sp800-61r3"
+            ]
+          }
+        }
+      ]
+    },
+    "n02_owner": {
+      "title": "\"We have thirty-eight patients today\"",
+      "clockAdvance": 0.5,
+      "inbox": [
+        {
+          "from": "Dr. Lena Ortiz, Practice Owner",
+          "channel": "phone",
+          "body": "I just heard. We have thirty-eight patients on the schedule, two of them post-op checks, and the e-prescribing system is how we get refills to the pharmacy. I need to know whether we can see people today. What do you need from me?"
+        }
+      ],
+      "narrative": "Dr. Ortiz owns the practice and makes the business calls. She is calm but clearly wants to keep the doors open. Whatever you say now sets the tone for the next two weeks.",
+      "choices": [
+        {
+          "id": "hold_isolation",
+          "label": "Keep everything isolated and run a reduced paper schedule; urgent cases only",
+          "hint": "Painful, but nothing reconnects until you know it's clean.",
+          "requires": {
+            "isolated": true
+          },
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 6,
+            "cost": 9000,
+            "trust": -2
+          },
+          "setFlags": {
+            "notifiedLeadership": true,
+            "paperMode": true
+          },
+          "next": "n03_callwho",
+          "debrief": {
+            "whyItMatters": "Leadership owns the trade-off between operating and containing. Giving the owner a clear recommendation, with a paper fallback, lets the practice keep caring for urgent patients without re-exposing systems.",
+            "betterPractice": "Escalate to leadership immediately with a recommendation, the risks and a plan for manual workarounds. Under CSF 2.0 this is Govern: roles and decision authority.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "nist-csf2"
+            ]
+          }
+        },
+        {
+          "id": "reconnect_ehr",
+          "label": "Reconnect the EHR server so the doctors can work, and watch it closely",
+          "hint": "Keeps the schedule. You'll pull the plug if anything looks wrong.",
+          "requires": {
+            "isolated": true
+          },
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "dataLoss": 14,
+            "legal": 5
+          },
+          "setFlags": {
+            "notifiedLeadership": true,
+            "keptOpen": true
+          },
+          "next": "n03_callwho",
+          "debrief": {
+            "whyItMatters": "You cannot watch for what you cannot see yet. The attacker still had valid credentials, and reconnecting gave them the EHR and the NAS again.",
+            "betterPractice": "Do not reconnect any system until it has been scoped and cleaned. Use downtime procedures, such as paper charts and phone refills, to keep care going.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "isolate_after_call",
+          "label": "Tell her it's spreading and isolate everything now",
+          "hint": "Late, but better than never. Expect a messier restore.",
+          "requires": {
+            "isolated": false
+          },
+          "csf": "RS",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "keyDecision": true,
+          "keyGroup": "contain",
+          "effects": {
+            "downtime": 8,
+            "cost": 6000,
+            "trust": -2
+          },
+          "setFlags": {
+            "notifiedLeadership": true,
+            "isolated": true,
+            "isolatedLate": true
+          },
+          "next": "n03_callwho",
+          "debrief": {
+            "whyItMatters": "Containing late still limits the damage, and telling the owner plainly what is happening earns you the authority to do it.",
+            "betterPractice": "Contain at the first sign of ransomware. Every connected minute adds to what must be restored.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "keep_seeing",
+          "label": "Keep seeing patients today and isolate after hours tonight",
+          "hint": "No cancellations. It's only a few more hours.",
+          "requires": {
+            "isolated": false
+          },
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "dataLoss": 20,
+            "legal": 8
+          },
+          "setFlags": {
+            "notifiedLeadership": true,
+            "keptOpen": true,
+            "isolated": true,
+            "isolatedLate": true
+          },
+          "clockAdvance": 2,
+          "next": "n03_callwho",
+          "debrief": {
+            "whyItMatters": "A full clinic day on a compromised network is a full day of spread. By tonight the NAS backups and billing server were encrypted too.",
+            "betterPractice": "Business continuity comes from manual workarounds, not from keeping compromised systems online.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "n03_callwho": {
+      "title": "Who do you call?",
+      "clockAdvance": 1,
+      "inbox": [
+        {
+          "from": "Paul Reyes, Office Manager",
+          "channel": "email",
+          "subject": "Found the cyber policy",
+          "body": "Found the insurance binder in the safe. There's a 24/7 breach hotline on page 2 and a list of 'panel' firms. It says to notify them 'as soon as practicable' and not to hire outside vendors without approval. Also, my cousin's IT company can be here in an hour if you want."
+        }
+      ],
+      "narrative": "You have contained what you can. Now you need help: people who do this every week, lawyers who know the notification rules, and someone to pay for it. There is no written plan telling you who to call first.",
+      "choices": [
+        {
+          "id": "call_insurer",
+          "label": "Call the insurer's breach hotline now and accept their panel IR firm and breach counsel",
+          "hint": "Starts the clock on coverage. Their people take a few hours to engage.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "insurer",
+          "effects": {
+            "cost": 10000,
+            "legal": -5
+          },
+          "setFlags": {
+            "calledInsurer": true,
+            "irFirmEngaged": true,
+            "notifiedLegal": true
+          },
+          "next": "n04_scope",
+          "debrief": {
+            "whyItMatters": "Specialist responders and breach counsel bring experience a 40-person clinic cannot have in-house. Working through counsel also helps structure the legal analysis of notification duties.",
+            "betterPractice": "Know your insurer's notice requirements and hotline before an incident, and put them in the IR plan's call tree.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "local_vendor",
+          "label": "Bring in the office manager's cousin's IT company to start cleaning up",
+          "hint": "Fast and local, and they know small offices. Not on the insurer's list.",
+          "csf": "RS",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 18000,
+            "legal": 5
+          },
+          "setFlags": {
+            "localVendor": true
+          },
+          "next": "n04_scope",
+          "debrief": {
+            "whyItMatters": "A general IT shop may wipe and reinstall before anyone collects evidence, and unapproved vendors can create coverage disputes.",
+            "betterPractice": "Use responders with forensic experience, and coordinate with the insurer before engaging vendors.",
+            "referenceIds": [
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "solo",
+          "label": "Handle it in-house for now; call people once you know more",
+          "hint": "No fees and no outsiders until you understand the problem.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "downtime": 6,
+            "legal": 6
+          },
+          "next": "n04_scope",
+          "debrief": {
+            "whyItMatters": "Waiting to call for help means the hardest early hours run without expertise, and notice clocks such as insurance and legal deadlines may already be running.",
+            "betterPractice": "Escalate early. You can always stand help down; you cannot get the first hours back.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "n04_scope": {
+      "title": "How did they get in?",
+      "clockAdvance": 2,
+      "inbox": [
+        {
+          "from": "Dr. Lena Ortiz, Practice Owner",
+          "channel": "text",
+          "body": "Pharmacy called twice about refills. How long until we know what happened?"
+        }
+      ],
+      "narrative": "Before anything gets restored, you need to know how the attackers got in, what they touched, and whether they are still inside. Restoring onto a network they still control just hands it back to them.",
+      "choices": [
+        {
+          "id": "ir_forensics",
+          "label": "Have the IR firm collect logs and image the key servers before anything is wiped",
+          "hint": "Thorough. Their first findings take about five hours.",
+          "requires": {
+            "irFirmEngaged": true
+          },
+          "csf": "DE",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "scope",
+          "effects": {
+            "cost": 35000,
+            "downtime": 4,
+            "legal": -4
+          },
+          "setFlags": {
+            "scoped": true
+          },
+          "next": "n05_findings",
+          "debrief": {
+            "whyItMatters": "Forensics tells you the way in (so you can close it), what was taken (which drives notification), and whether the attacker still has access.",
+            "betterPractice": "Preserve and analyze evidence before rebuilding. Scoping decisions drive both eradication and legal notice.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "self_logs",
+          "label": "Pull the remote-access and firewall logs yourself",
+          "hint": "Free, and you know the network. You are not a forensic analyst.",
+          "csf": "DE",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "downtime": 3
+          },
+          "setFlags": {
+            "knowsInitialAccess": true,
+            "suspectExfil": true
+          },
+          "next": "n05_partial",
+          "debrief": {
+            "whyItMatters": "You can often find the front door yourself. Proving what data left, and ruling out other footholds, usually takes forensic tools and experience.",
+            "betterPractice": "Do the quick log review, and escalate to forensic specialists for scope and exfiltration questions.",
+            "referenceIds": [
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "skip_scope",
+          "label": "Skip the investigation and go straight to getting systems back",
+          "hint": "Patients come first, and you can investigate later.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "legal": 8
+          },
+          "setFlags": {
+            "skippedScoping": true
+          },
+          "next": "n06_backups",
+          "debrief": {
+            "whyItMatters": "Without scoping you cannot tell whether data was stolen, which is the question that decides HIPAA breach notification, and you may restore onto a network the attacker still controls.",
+            "betterPractice": "Investigate first, restore second. Even a fast scoping pass beats none.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "hhs-ransomware-fact-sheet"
+            ]
+          }
+        }
+      ]
+    },
+    "n05_findings": {
+      "title": "The IR firm's first findings",
+      "clockAdvance": 5,
+      "setFlags": {
+        "knowsInitialAccess": true,
+        "confirmedExfil": true
+      },
+      "inbox": [
+        {
+          "from": "Kestrel Point Incident Response (panel firm)",
+          "channel": "email",
+          "subject": "Preliminary findings, privileged and confidential",
+          "body": "1) Initial access: the account 'fd-remote' logged in through the remote-access gateway nine days ago, from overseas IP addresses. The account had no MFA.\n2) The actor created a domain admin account and disabled antivirus on six servers.\n3) Exfiltration: about 38 GB went out to a file-sharing service two days ago, including EHR exports and billing files.\n4) Encryption began at 03:10 this morning."
+        }
+      ],
+      "narrative": "Now you know: a reused password on an old remote-access account, no MFA, nine days of quiet access, and patient data out the door before a single file was encrypted. This is double extortion.\n\nThe attacker built their own admin account. Until it is gone, nothing you restore is safe.",
+      "choices": [
+        {
+          "id": "full_reset",
+          "label": "Reset every password, remove the rogue admin account, and require MFA before anything reconnects",
+          "hint": "Slows recovery by a few hours and annoys everyone. Closes the door.",
+          "csf": "PR",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "keyDecision": true,
+          "keyGroup": "eradicate",
+          "effects": {
+            "cost": 6000,
+            "downtime": 4,
+            "legal": -3
+          },
+          "setFlags": {
+            "resetCredentials": true,
+            "mfaEnforced": true
+          },
+          "next": "n06_backups",
+          "debrief": {
+            "whyItMatters": "Eradication means removing every foothold: compromised accounts, attacker-created admins, and the access path itself. Otherwise the attacker simply comes back.",
+            "betterPractice": "Reset credentials (especially privileged and service accounts), remove persistence, and enforce MFA on remote access before restoring.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "cisa-cpg"
+            ]
+          }
+        },
+        {
+          "id": "partial_reset",
+          "label": "Disable 'fd-remote' and the rogue admin now; do the full password reset after systems are back",
+          "hint": "Removes the known way in without locking out the whole staff.",
+          "csf": "PR",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 1000,
+            "legal": 3
+          },
+          "setFlags": {
+            "partialReset": true
+          },
+          "next": "n06_backups",
+          "debrief": {
+            "whyItMatters": "Nine days of domain access means the attacker could have harvested many passwords. Closing only the doors you know about leaves the others open.",
+            "betterPractice": "Treat every credential in the domain as compromised after attackers gain domain admin rights.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "n05_partial": {
+      "title": "What the logs show",
+      "clockAdvance": 3,
+      "inbox": [
+        {
+          "from": "Remote-access gateway (log export)",
+          "channel": "email",
+          "subject": "fd-remote · 27 sessions",
+          "body": "fd-remote · 02:14–04:51 · 185.xx.xx.xx\nfd-remote · 01:58–05:12 · 185.xx.xx.xx\n… 25 more sessions over 9 days. Last session ended 03:06 today."
+        }
+      ],
+      "narrative": "An old remote-access account, 'fd-remote', made from the front desk's pandemic-era setup with no MFA, has been logging in at night for nine days. The firewall shows large outbound transfers two nights ago, but you can't tell what was in them.",
+      "choices": [
+        {
+          "id": "partial_full_reset",
+          "label": "Reset every password and require MFA on remote access before anything reconnects",
+          "hint": "Closes the door you found, and any you didn't.",
+          "csf": "PR",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "keyDecision": true,
+          "keyGroup": "eradicate",
+          "effects": {
+            "cost": 5000,
+            "downtime": 4
+          },
+          "setFlags": {
+            "resetCredentials": true,
+            "mfaEnforced": true
+          },
+          "next": "n06_backups",
+          "debrief": {
+            "whyItMatters": "You found one way in. After nine days inside, the attacker may hold many more passwords.",
+            "betterPractice": "Reset all credentials and enforce MFA on remote access before restoring.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "cisa-cpg"
+            ]
+          }
+        },
+        {
+          "id": "partial_call_insurer",
+          "label": "This is bigger than you: call the insurer's hotline and get their forensic team in",
+          "hint": "Late notice, but you get experts and counsel. They'll reset credentials as part of the job.",
+          "requires": {
+            "calledInsurer": false
+          },
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "insurer",
+          "effects": {
+            "cost": 45000,
+            "downtime": 6,
+            "legal": -2
+          },
+          "setFlags": {
+            "calledInsurer": true,
+            "irFirmEngaged": true,
+            "notifiedLegal": true,
+            "scoped": true,
+            "confirmedExfil": true,
+            "resetCredentials": true,
+            "mfaEnforced": true
+          },
+          "next": "n06_backups",
+          "debrief": {
+            "whyItMatters": "Recognizing what you can't handle is a real skill. The specialists confirmed the outbound transfers were 38 GB of patient data, which changes your legal obligations.",
+            "betterPractice": "Escalate as soon as you see signs of data theft. Exfiltration questions need forensic answers.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "hhs-ransomware-fact-sheet"
+            ]
+          }
+        },
+        {
+          "id": "disable_one",
+          "label": "Disable 'fd-remote' and move on to recovery",
+          "hint": "That's the way in. Done.",
+          "csf": "PR",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "legal": 4
+          },
+          "setFlags": {
+            "partialReset": true
+          },
+          "next": "n06_backups",
+          "debrief": {
+            "whyItMatters": "Closing the first door you find is not eradication. Attackers with nine days of access usually leave more than one way back in.",
+            "betterPractice": "Assume persistence: check for new accounts, scheduled tasks and remote tools, and reset all credentials.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "n06_backups": {
+      "title": "The backup reality check",
+      "clockAdvance": 3,
+      "inbox": [
+        {
+          "from": "Dr. Lena Ortiz, Practice Owner",
+          "channel": "email",
+          "subject": "Backups?",
+          "body": "We pay for backups every month. Can't we just restore from those tonight and be open tomorrow?"
+        }
+      ],
+      "narrative": "According to the org profile there are two backups: a nightly copy on the NAS in the server closet and a weekly copy to a cloud service. Nobody has ever done a full test restore. Everything about the next week depends on what you find.",
+      "choices": [
+        {
+          "id": "check_all",
+          "label": "Check every backup: the NAS and the weekly cloud copy, and test-restore a sample of records",
+          "hint": "Takes a few hours, but you'll know exactly what you have.",
+          "csf": "ID",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "backups",
+          "effects": {
+            "downtime": 3,
+            "cost": 1500
+          },
+          "setFlags": {
+            "checkedBackups": true,
+            "knowsNasEncrypted": true,
+            "knowsCloudIntact": true
+          },
+          "next": "n07_restoreplan",
+          "debrief": {
+            "whyItMatters": "The NAS was encrypted, and the cloud copy wasn't. Checking every backup, and proving it restores, is what turns 'should we pay?' into 'we don't need to'.",
+            "betterPractice": "Verify every backup location and test a restore before deciding anything about the ransom. Better still, test restores before an incident.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "cisa-cpg"
+            ]
+          }
+        },
+        {
+          "id": "check_nas",
+          "label": "Check the NAS, since that's where the nightly backups are",
+          "hint": "The most recent backup is the one you want.",
+          "csf": "ID",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "downtime": 1
+          },
+          "setFlags": {
+            "knowsNasEncrypted": true
+          },
+          "next": "n06b_nas_gone",
+          "debrief": {
+            "whyItMatters": "The NAS sat on the same network and was encrypted with everything else. Checking only the most convenient backup almost hid the one that survived.",
+            "betterPractice": "Check all copies, especially offline or off-site ones. On-network backups are the attacker's first target.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "assume_ok",
+          "label": "Tell Dr. Ortiz you'll restore tonight, and start the restore after hours",
+          "hint": "Saves a few hours of checking. The backups have always run green.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 10,
+            "trust": -3
+          },
+          "setFlags": {
+            "knowsNasEncrypted": true,
+            "brokenPromise": true
+          },
+          "next": "n06b_nas_gone",
+          "debrief": {
+            "whyItMatters": "A green backup job is not a working backup. You found out at 11 p.m. that the NAS was encrypted, after promising the owner an opening.",
+            "betterPractice": "Do not promise recovery timelines until a test restore succeeds.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "cisa-cpg"
+            ]
+          }
+        }
+      ]
+    },
+    "n06b_nas_gone": {
+      "title": "The NAS is encrypted too",
+      "clockAdvance": 3,
+      "inbox": [
+        {
+          "from": "NAS admin console",
+          "channel": "email",
+          "subject": "Volume health: 0 readable snapshots",
+          "body": "All 30 nightly snapshots fail integrity checks. File names end in .qhc."
+        }
+      ],
+      "narrative": "Every nightly backup on the NAS is encrypted. Dr. Ortiz asks the question everyone is thinking: \"So do we have to pay them?\"",
+      "choices": [
+        {
+          "id": "ask_cloud",
+          "label": "Call the cloud backup vendor and ask exactly what's in the weekly copy",
+          "hint": "It's the copy nobody looks at. Worth an hour.",
+          "csf": "ID",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "backups",
+          "effects": {
+            "downtime": 2
+          },
+          "setFlags": {
+            "checkedBackups": true,
+            "knowsCloudIntact": true
+          },
+          "next": "n07_restoreplan",
+          "debrief": {
+            "whyItMatters": "The off-network weekly copy survived. One phone call changed the whole negotiation.",
+            "betterPractice": "Keep an inventory of every backup and how to restore from it, so this answer takes minutes, not luck.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "cisa-cpg"
+            ]
+          }
+        },
+        {
+          "id": "open_talks",
+          "label": "Conclude there are no usable backups and open the attackers' portal",
+          "hint": "You need to know what they want and whether their tool works.",
+          "csf": "RS",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "legal": 3,
+            "downtime": 12
+          },
+          "setFlags": {
+            "negotiating": true,
+            "believesNoBackups": true
+          },
+          "next": "n08_negotiate",
+          "debrief": {
+            "whyItMatters": "You negotiated from a position of believed weakness, without knowing an intact cloud backup existed.",
+            "betterPractice": "Exhaust every recovery option and get legal and law-enforcement input before engaging the attacker.",
+            "referenceIds": [
+              "fbi-ic3-ransomware",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "n07_restoreplan": {
+      "title": "A way back, five days old",
+      "clockAdvance": 4,
+      "inbox": [
+        {
+          "from": "Vaultline Cloud Backup Support",
+          "channel": "email",
+          "subject": "Ticket #88213: restore options",
+          "body": "Your most recent weekly snapshot (Sunday 01:00) is intact and was not modified. Full restore of 1.9 TB: about 30 hours of transfer. We can ship an encrypted drive overnight if faster."
+        }
+      ],
+      "narrative": "The weekly cloud copy is clean. Restoring it means losing about five days of chart notes and billing, which staff will re-enter from paper and the e-prescribing vendor's records. It also means rebuilding servers so the restore lands somewhere clean.",
+      "choices": [
+        {
+          "id": "restore_clean",
+          "label": "Rebuild clean servers and restore the cloud copy, without contacting the attackers",
+          "hint": "The slow, safe path: about three days, and five days of re-entry.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 60000,
+            "downtime": 54,
+            "dataLoss": 6
+          },
+          "setFlags": {
+            "restoringClean": true,
+            "refusedToPay": true
+          },
+          "next": "n09_notify",
+          "debrief": {
+            "whyItMatters": "Restoring known-good data into a rebuilt environment recovers operations without funding the attacker or trusting their decryptor.",
+            "betterPractice": "Rebuild from known-good images, restore from verified backups, and monitor closely after go-live.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "talk_while_restore",
+          "label": "Restore clean, but open the attackers' portal to find out what they stole",
+          "hint": "Intelligence on what they have could shape your notifications.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "cost": 60000,
+            "downtime": 54,
+            "dataLoss": 6,
+            "legal": 2
+          },
+          "setFlags": {
+            "restoringClean": true,
+            "negotiating": true
+          },
+          "next": "n08_negotiate",
+          "debrief": {
+            "whyItMatters": "Some organizations engage to learn what was taken. That carries risk: it can signal willingness to pay, and should be done with counsel and law enforcement aware.",
+            "betterPractice": "If you engage at all, do it through experienced negotiators and counsel, and tell the FBI.",
+            "referenceIds": [
+              "fbi-ic3-ransomware",
+              "ofac-ransomware-advisory-2021"
+            ]
+          }
+        },
+        {
+          "id": "restore_inplace",
+          "label": "Restore straight onto the existing servers to cut a day off",
+          "hint": "Faster. The servers are 'probably fine' once the files are replaced.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 45000,
+            "downtime": 40,
+            "dataLoss": 6
+          },
+          "setFlags": {
+            "dirtyRestore": true,
+            "refusedToPay": true
+          },
+          "next": [
+            {
+              "if": {
+                "resetCredentials": true,
+                "scoped": true
+              },
+              "next": "n09_notify"
+            },
+            {
+              "else": "n07c_reinfect"
+            }
+          ],
+          "debrief": {
+            "whyItMatters": "Restoring onto the old servers is only safe if forensics has confirmed every foothold is gone and credentials are reset. Otherwise the attacker's tools are still waiting on the disks.",
+            "betterPractice": "Restore into rebuilt systems after eradication is complete.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "n07c_reinfect": {
+      "title": "The note is back",
+      "clockAdvance": 30,
+      "effects": {
+        "downtime": 30,
+        "cost": 30000,
+        "trust": -6,
+        "dataLoss": 4
+      },
+      "inbox": [
+        {
+          "from": "Marisol, Front Desk",
+          "channel": "text",
+          "body": "The black screen is back on two computers. I'm so sorry, I didn't click anything!"
+        },
+        {
+          "from": "Quiet Harbor Collective",
+          "channel": "portal",
+          "body": "We see you restored. Cute. We are still here. Price is now $600,000."
+        }
+      ],
+      "narrative": "The attacker still had working credentials and re-encrypted two of the restored servers. Staff morale drops, and so does the owner's confidence.",
+      "choices": [
+        {
+          "id": "rebuild_eradicate",
+          "label": "Stop, rebuild clean, reset every credential, and enforce MFA",
+          "hint": "Do it properly this time. Another two days.",
+          "csf": "PR",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "keyDecision": true,
+          "keyGroup": "eradicate",
+          "effects": {
+            "cost": 40000,
+            "downtime": 48
+          },
+          "setFlags": {
+            "resetCredentials": true,
+            "mfaEnforced": true
+          },
+          "next": "n09_notify",
+          "debrief": {
+            "whyItMatters": "A second encryption is the classic sign of incomplete eradication. Rebuilding properly ends the cycle.",
+            "betterPractice": "Treat the whole domain as compromised until proven otherwise.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "cisa-cpg"
+            ]
+          }
+        },
+        {
+          "id": "reimage_two",
+          "label": "Re-image the two affected machines and keep going",
+          "hint": "Contained to two boxes. Don't throw away the progress.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 12,
+            "legal": 8,
+            "dataLoss": 6
+          },
+          "setFlags": {
+            "lingeringAccess": true
+          },
+          "next": "n09_notify",
+          "debrief": {
+            "whyItMatters": "The symptom was two machines; the cause was the attacker's access, which you did not remove.",
+            "betterPractice": "Fix the root cause by removing persistence and resetting credentials, not just the symptoms.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "n08_negotiate": {
+      "title": "The portal",
+      "clockAdvance": 2,
+      "inbox": [
+        {
+          "from": "Quiet Harbor Collective · support",
+          "channel": "portal",
+          "body": "Hello Brazos Valley. We have 38 GB: charts, insurance cards, billing. Proof attached (12 sample files). Price is $450,000. Pay within 48h for 30% discount. We give decryptor + deletion log + 'security report'. If you call police, deal is over."
+        }
+      ],
+      "narrative": "The sample files are real: a page from a patient chart and a scanned insurance card. The countdown on the portal says 51 hours. Dr. Ortiz asks you what the options are and who you have talked to.",
+      "choices": [
+        {
+          "id": "counsel_fbi",
+          "label": "Before anything else, brief counsel and the FBI field office and have counsel check sanctions risk",
+          "hint": "Takes a day. The attackers said not to call police.",
+          "csf": "GV",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "lawEnforcement",
+          "effects": {
+            "cost": 8000,
+            "legal": -8
+          },
+          "setFlags": {
+            "notifiedFBI": true,
+            "notifiedLegal": true,
+            "sanctionsChecked": true
+          },
+          "next": "n08b_paydecision",
+          "debrief": {
+            "whyItMatters": "Treasury warns that paying a sanctioned actor can violate sanctions law even unknowingly, and lists prompt reporting to and cooperation with law enforcement as mitigating factors. The FBI asks victims to report whether or not they pay.",
+            "betterPractice": "Involve counsel and law enforcement before any payment decision. 'Don't call the police' is a pressure tactic.",
+            "referenceIds": [
+              "ofac-ransomware-advisory-2021",
+              "fbi-ic3-ransomware"
+            ]
+          }
+        },
+        {
+          "id": "negotiator",
+          "label": "Let the IR firm's negotiator handle the conversation and try to talk the price down",
+          "hint": "Professionals. They know this group's habits.",
+          "requires": {
+            "irFirmEngaged": true
+          },
+          "csf": "RS",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 12000
+          },
+          "setFlags": {
+            "negotiated": true
+          },
+          "next": "n08b_paydecision",
+          "debrief": {
+            "whyItMatters": "Experienced negotiators can buy time and verify claims, but negotiating does not replace the legal and law-enforcement steps.",
+            "betterPractice": "Use professional negotiators, and still bring in counsel and the FBI before any payment.",
+            "referenceIds": [
+              "fbi-ic3-ransomware",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "go_dark",
+          "label": "Stop engaging and recover with what you have",
+          "hint": "They've shown their hand. No more contact.",
+          "csf": "RS",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "legal": 2
+          },
+          "setFlags": {
+            "refusedToPay": true,
+            "negotiating": false
+          },
+          "next": [
+            {
+              "if": {
+                "knowsCloudIntact": true
+              },
+              "next": "n09_notify"
+            },
+            {
+              "else": "n08d_rebuild"
+            }
+          ],
+          "debrief": {
+            "whyItMatters": "Walking away is legitimate, and the U.S. government discourages paying. Without knowing your backup status, though, you walked away blind.",
+            "betterPractice": "Decide on payment with full knowledge of your recovery options, and report to law enforcement either way.",
+            "referenceIds": [
+              "fbi-ic3-ransomware",
+              "ofac-ransomware-advisory-2021"
+            ]
+          }
+        }
+      ]
+    },
+    "n08b_paydecision": {
+      "title": "Do we pay?",
+      "clockAdvance": 10,
+      "inbox": [
+        {
+          "from": "Dr. Lena Ortiz, Practice Owner",
+          "channel": "email",
+          "subject": "Decision needed today",
+          "body": "I need a recommendation, not a list of risks. Our patients need their records. What would you do?"
+        }
+      ],
+      "narrative": "The negotiated price is about $315,000. Paying might restore files faster than rebuilding, but nothing guarantees the decryptor works or that the stolen data is deleted. The leak threat is the real leverage now.",
+      "choices": [
+        {
+          "id": "pay_checked",
+          "label": "Recommend paying, through counsel, after the sanctions check, with the FBI informed",
+          "hint": "If you pay, pay carefully. Documented, legal, reported.",
+          "requires": {
+            "sanctionsChecked": true
+          },
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 330000,
+            "legal": 6,
+            "trust": -6
+          },
+          "setFlags": {
+            "paid": true,
+            "negotiating": false
+          },
+          "next": "n08c_decryptor",
+          "debrief": {
+            "whyItMatters": "Paying after legal review reduces sanctions exposure but does not change what you are buying: an unreliable decryptor and a criminal's promise to delete data.",
+            "betterPractice": "Make payment a governance decision with counsel, the insurer and law enforcement involved, and plan as if the data will leak anyway.",
+            "realWorld": "In 2024, the ransomware attack on Change Healthcare disrupted claims processing nationwide. HHS OCR opened an investigation into the breach of protected health information.",
+            "referenceIds": [
+              "ofac-ransomware-advisory-2021",
+              "fbi-ic3-ransomware",
+              "hhs-change-healthcare-faq"
+            ]
+          }
+        },
+        {
+          "id": "pay_fast",
+          "label": "Pay now to lock in the discount before the deadline",
+          "hint": "Every hour costs money, and the discount expires.",
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "cost": 318000,
+            "legal": 22,
+            "trust": -8
+          },
+          "setFlags": {
+            "paid": true,
+            "paidUnchecked": true,
+            "negotiating": false
+          },
+          "next": "n08c_decryptor",
+          "debrief": {
+            "whyItMatters": "Paying without a sanctions check risks strict-liability penalties if the recipient turns out to be sanctioned, on top of every other risk of paying.",
+            "betterPractice": "Never let an attacker's countdown skip the legal and law-enforcement steps.",
+            "referenceIds": [
+              "ofac-ransomware-advisory-2021"
+            ]
+          }
+        },
+        {
+          "id": "refuse",
+          "label": "Recommend not paying, and recover with what you have",
+          "hint": "No guarantees from criminals. Put the money into recovery instead.",
+          "csf": "GV",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "legal": -2
+          },
+          "setFlags": {
+            "refusedToPay": true,
+            "negotiating": false
+          },
+          "next": [
+            {
+              "if": {
+                "knowsCloudIntact": true
+              },
+              "next": "n09_notify"
+            },
+            {
+              "else": "n08d_rebuild"
+            }
+          ],
+          "debrief": {
+            "whyItMatters": "The FBI does not support paying, because payment doesn't guarantee recovery and funds more attacks. Declining still leaves the leak threat to manage.",
+            "betterPractice": "Decline from a position of strength: verified backups, a recovery plan, and a communications plan for a possible leak.",
+            "referenceIds": [
+              "fbi-ic3-ransomware",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "n08c_decryptor": {
+      "title": "The decryptor arrives",
+      "clockAdvance": 8,
+      "inbox": [
+        {
+          "from": "Quiet Harbor Collective · support",
+          "channel": "portal",
+          "body": "Payment received. Thank you for business. Decryptor attached. Data deleted (see log). Recommendation: use MFA ;)"
+        },
+        {
+          "from": "Kestrel Point Incident Response",
+          "channel": "email",
+          "subject": "Decryptor test",
+          "body": "In our lab the tool decrypted about 70% of a sample set. It crashes on large database files, so the EHR database is at risk. Recommend running only on copies."
+        }
+      ],
+      "narrative": "The decryptor partly works. The 'deletion log' is a text file anyone could have typed.",
+      "choices": [
+        {
+          "id": "decrypt_copies",
+          "label": "Run the decryptor on copies in an isolated environment, and rebuild what fails",
+          "hint": "Slower, but a crash can't destroy the originals.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 60,
+            "cost": 30000,
+            "dataLoss": 10
+          },
+          "setFlags": {
+            "restoringClean": true
+          },
+          "next": "n09_notify",
+          "debrief": {
+            "whyItMatters": "Attacker decryptors are often buggy. Testing on copies protects the encrypted originals, which may be all you have.",
+            "betterPractice": "Treat a paid decryptor as untrusted software: test it, run it on copies, and restore into clean systems.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "fbi-ic3-ransomware"
+            ]
+          }
+        },
+        {
+          "id": "decrypt_live",
+          "label": "Run it directly on the production server to get running today",
+          "hint": "You paid for speed, so use it.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 30,
+            "dataLoss": 28,
+            "cost": 15000
+          },
+          "next": "n09_notify",
+          "debrief": {
+            "whyItMatters": "The decryptor crashed partway through the EHR database and corrupted it. Paying bought speed and cost data.",
+            "betterPractice": "Never run untested attacker tools on your only copy.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          },
+          "setFlags": {
+            "restoringClean": true
+          }
+        }
+      ]
+    },
+    "n08d_rebuild": {
+      "title": "Rebuilding without backups",
+      "clockAdvance": 6,
+      "inbox": [
+        {
+          "from": "ChartStore EHR Vendor Support",
+          "channel": "email",
+          "subject": "Re: data recovery",
+          "body": "We don't hold your data. Your contract is on-premises. We can reinstall a blank system and import whatever exports you have."
+        }
+      ],
+      "narrative": "Without backups and without paying, the path is a rebuild: blank systems, re-entering active patients from paper, pharmacy records and insurer data. Before you commit, is there anywhere you haven't looked?",
+      "choices": [
+        {
+          "id": "last_look",
+          "label": "Before committing, check with every vendor that might hold a copy, including the cloud backup subscription on the invoice",
+          "hint": "An afternoon of phone calls.",
+          "csf": "ID",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "backups",
+          "effects": {
+            "downtime": 60,
+            "cost": 60000,
+            "dataLoss": 6
+          },
+          "setFlags": {
+            "checkedBackups": true,
+            "knowsCloudIntact": true,
+            "restoringClean": true
+          },
+          "next": "n09_notify",
+          "debrief": {
+            "whyItMatters": "The weekly cloud copy existed all along. Finding it late still saved weeks, but you negotiated and planned around a gap that wasn't real.",
+            "betterPractice": "A current inventory of systems and backups belongs in the IR plan.",
+            "referenceIds": [
+              "cisa-cpg",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "rebuild_scratch",
+          "label": "Commit to a full rebuild from scratch",
+          "hint": "Weeks of re-entry, but you'll own a clean system.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 240,
+            "dataLoss": 40,
+            "cost": 180000,
+            "trust": -8
+          },
+          "setFlags": {
+            "rebuiltFromScratch": true,
+            "restoringClean": true
+          },
+          "next": "n09_notify",
+          "debrief": {
+            "whyItMatters": "Rebuilding from nothing is the most expensive outcome in time and data, and it happened because the surviving backup was never found.",
+            "betterPractice": "Know where every backup lives before you need it, and keep one offline.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "cisa-cpg"
+            ]
+          }
+        }
+      ]
+    },
+    "n09_notify": {
+      "title": "Who else needs to know?",
+      "clockAdvance": 12,
+      "inbox": [
+        {
+          "from": "Breach counsel (summary memo)",
+          "channel": "email",
+          "subject": "Notification obligations: summary",
+          "body": "HHS presumes a ransomware incident involving ePHI is a breach unless a documented risk assessment shows a low probability of compromise. Individual notices: without unreasonable delay, no later than 60 days from discovery. 500+ affected: also notify HHS within 60 days and, if more than 500 residents of a state, prominent media. Texas: notify the Attorney General within 30 days if 250+ Texans are affected."
+        }
+      ],
+      "narrative": "You are on Day 2. Thousands of patients may be affected. Notification duties now apply to you, and how you handle them will shape legal exposure and public trust for years.",
+      "choices": [
+        {
+          "id": "notify_properly",
+          "label": "With counsel, start the formal process: report to the FBI (IC3), document the risk assessment, and schedule HHS, Texas AG and patient notices within the deadlines",
+          "hint": "Expensive and public, but it's the law and the right thing.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "keyDecision": true,
+          "keyGroup": "notify",
+          "effects": {
+            "cost": 25000,
+            "legal": -15,
+            "trust": 3
+          },
+          "setFlags": {
+            "notifiedFBI": true,
+            "notifiedRegulators": true,
+            "notifiedLegal": true
+          },
+          "next": "n10_media",
+          "debrief": {
+            "whyItMatters": "HIPAA sets an outer limit of 60 days from discovery, not a target. Texas requires notice to its Attorney General within 30 days for 250+ residents. Reporting to the FBI can help investigators and is a mitigating factor in Treasury's sanctions guidance.",
+            "betterPractice": "Start the notification clock on discovery, work through counsel, document the four-factor risk assessment, and report to law enforcement.",
+            "referenceIds": [
+              "hhs-breach-notification-rule",
+              "ecfr-45-164-subpart-d",
+              "tx-bcc-521-053",
+              "fbi-ic3-ransomware"
+            ]
+          }
+        },
+        {
+          "id": "wait_report",
+          "label": "Wait for the final forensic report before telling anyone outside the clinic",
+          "hint": "Don't notify on guesses. The report is about three weeks out.",
+          "csf": "RS",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "legal": 12,
+            "trust": -2
+          },
+          "setFlags": {
+            "delayedNotice": true
+          },
+          "next": "n10_media",
+          "debrief": {
+            "whyItMatters": "Notice deadlines run from discovery, not from the final report. Three weeks of waiting eats into a 60-day federal limit and blows through Texas's 30-day AG deadline if the report runs late.",
+            "betterPractice": "Notify on what you know, and supplement later. Regulators expect updates.",
+            "referenceIds": [
+              "hhs-breach-notification-rule",
+              "tx-bcc-521-053"
+            ]
+          }
+        },
+        {
+          "id": "not_reportable",
+          "label": "Decide it isn't reportable, since nobody can prove anyone viewed the records",
+          "hint": "Avoids frightening 9,000 patients over something that might not matter.",
+          "csf": "GV",
+          "legacyPhase": "Detection & Analysis",
+          "effects": {
+            "legal": 25,
+            "trust": -4
+          },
+          "setFlags": {
+            "claimedNoBreach": true
+          },
+          "next": "n10_media",
+          "debrief": {
+            "whyItMatters": "Under HHS guidance, encryption of ePHI by ransomware is presumed to be a breach unless a risk assessment shows a low probability of compromise. With 38 GB of patient data stolen, that case is very hard to make.",
+            "betterPractice": "Apply the presumption, document the risk assessment, and notify on time.",
+            "referenceIds": [
+              "hhs-ransomware-fact-sheet",
+              "ecfr-45-164-subpart-d"
+            ]
+          }
+        }
+      ]
+    },
+    "n10_media": {
+      "title": "The reporter on line two",
+      "clockAdvance": 3,
+      "inbox": [
+        {
+          "from": "Dana Whitfield, Brazos Courier",
+          "channel": "phone",
+          "body": "Hi, I'm working on a story about the clinic being closed. Patients are telling me their appointments were cancelled, and someone sent me a screenshot of a site claiming to have your patient records. Can you confirm a cyberattack? I'm filing at 5."
+        }
+      ],
+      "narrative": "Patients are posting in community groups. The reporter is going to run something either way. Dr. Ortiz wants your advice on what to say.",
+      "choices": [
+        {
+          "id": "honest_statement",
+          "label": "Give a short, honest statement: what happened, what patients should do, and a dedicated call line",
+          "hint": "Coordinated with counsel. Admits the incident; doesn't speculate.",
+          "csf": "RS",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "trust": 8,
+            "cost": 8000
+          },
+          "setFlags": {
+            "notifiedPublic": true
+          },
+          "next": "n11_recovery",
+          "debrief": {
+            "whyItMatters": "People forgive incidents more readily than cover-ups. Telling patients early, with practical steps, protects them and the clinic's reputation.",
+            "betterPractice": "Prepare holding statements in advance, coordinate with counsel, and give affected people a clear point of contact.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "hhs-breach-notification-rule"
+            ]
+          }
+        },
+        {
+          "id": "no_comment",
+          "label": "'No comment while the investigation is ongoing'",
+          "hint": "Says nothing that could be used against you.",
+          "csf": "RS",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "trust": -7
+          },
+          "next": "n11_recovery",
+          "debrief": {
+            "whyItMatters": "Silence lets the attacker's leak site and rumor tell the story.",
+            "betterPractice": "A short, factual statement beats silence. You can say what you know without speculating.",
+            "referenceIds": [
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "spin",
+          "label": "Call it a 'technical outage' and say no patient data was involved",
+          "hint": "Calms people down. Technically, nothing is proven yet.",
+          "csf": "RS",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "trust": 3,
+            "legal": 6
+          },
+          "setFlags": {
+            "misleadingStatement": true
+          },
+          "next": "n11_recovery",
+          "debrief": {
+            "whyItMatters": "With data already stolen and a leak threat public, a denial is very likely to be contradicted, and false statements create their own legal exposure.",
+            "betterPractice": "Never deny what you have not ruled out.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "hhs-ransomware-fact-sheet"
+            ]
+          }
+        }
+      ]
+    },
+    "n11_recovery": {
+      "title": "Bringing the clinic back",
+      "clockAdvance": 20,
+      "inbox": [
+        {
+          "from": "Dr. Lena Ortiz, Practice Owner",
+          "channel": "text",
+          "body": "Staff are exhausted. If we can be fully open Monday that would mean everything."
+        }
+      ],
+      "narrative": "Rebuilt servers are ready and the data is restored or rebuilt. The question is how to bring everything back.",
+      "choices": [
+        {
+          "id": "eradicate_now",
+          "label": "Stop the go-live: reset every credential, remove the attacker's accounts, and enforce MFA first",
+          "hint": "The re-encryption proved they still have a way in. Another day.",
+          "requires": {
+            "resetCredentials": false
+          },
+          "csf": "PR",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "keyDecision": true,
+          "keyGroup": "eradicate",
+          "effects": {
+            "downtime": 24,
+            "cost": 20000
+          },
+          "setFlags": {
+            "resetCredentials": true,
+            "mfaEnforced": true
+          },
+          "next": "n11b_golive",
+          "debrief": {
+            "whyItMatters": "Clean servers do not help if the attacker still holds valid passwords and the remote-access door is open. Eradication has to come before recovery.",
+            "betterPractice": "Finish eradication (credentials, persistence, initial access path) before restoring, and confirm it with monitoring.",
+            "referenceIds": [
+              "cisa-stopransomware-guide",
+              "cisa-cpg"
+            ]
+          }
+        },
+        {
+          "id": "phased",
+          "label": "Bring systems back in priority order (EHR and e-prescribing first), each verified clean and monitored",
+          "hint": "Steady and boring, and it may miss Monday.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 18,
+            "cost": 12000
+          },
+          "setFlags": {
+            "recoveryDone": true
+          },
+          "next": "n12_staff",
+          "debrief": {
+            "whyItMatters": "Phased, verified restoration catches problems one system at a time and gets the most critical services, like prescriptions, back first.",
+            "betterPractice": "Restore in priority order, validate each system, and watch closely for signs that the attacker has returned.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "big_bang",
+          "label": "Turn everything back on at once Monday morning",
+          "hint": "One big push, and done.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 6,
+            "dataLoss": 4,
+            "trust": -3
+          },
+          "setFlags": {
+            "recoveryDone": true,
+            "rushedRecovery": true
+          },
+          "next": "n12_staff",
+          "debrief": {
+            "whyItMatters": "Monday's billing run duplicated claims and two interfaces failed silently. A rushed go-live trades a day of downtime for a week of errors.",
+            "betterPractice": "Stage the go-live and verify integrations before full load.",
+            "referenceIds": [
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "golive_anyway",
+          "label": "Re-image the affected machines and go live on schedule",
+          "hint": "It was two machines. Don't lose Monday.",
+          "requires": {
+            "reinfected": true,
+            "resetCredentials": false
+          },
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 8,
+            "legal": 8,
+            "dataLoss": 6,
+            "trust": -3
+          },
+          "setFlags": {
+            "lingeringAccess": true,
+            "recoveryDone": true
+          },
+          "next": "n12_staff",
+          "debrief": {
+            "whyItMatters": "The symptom was two machines; the cause was the attacker's access, which is still there.",
+            "betterPractice": "Fix the root cause by removing persistence and resetting credentials, not just the symptoms.",
+            "referenceIds": [
+              "cisa-stopransomware-guide"
+            ]
+          }
+        }
+      ]
+    },
+    "n12_staff": {
+      "title": "Inside the building",
+      "clockAdvance": 24,
+      "inbox": [
+        {
+          "from": "Paul Reyes, Office Manager",
+          "channel": "email",
+          "subject": "Workarounds",
+          "body": "Billing wants to send claims from a personal Gmail until the portal is fixed. Dr. Kim wants to download his panel to his home laptop 'just in case'. And staff keep asking whether they did something wrong."
+        }
+      ],
+      "narrative": "Staff are anxious and improvising. How you handle the people inside the clinic matters as much as the servers.",
+      "choices": [
+        {
+          "id": "brief_staff",
+          "label": "Brief all staff: what happened, what not to do (no personal email or downloads), and where to send questions",
+          "hint": "An hour of everyone's time, plus a short written FAQ.",
+          "csf": "GV",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "cost": 2000,
+            "trust": 3,
+            "legal": -3
+          },
+          "setFlags": {
+            "staffBriefed": true
+          },
+          "next": "n13_lessons",
+          "debrief": {
+            "whyItMatters": "Clear internal communication stops well-meaning workarounds that create new breaches, and reassures staff who fear blame.",
+            "betterPractice": "Include internal communications and acceptable workarounds in the IR plan.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "nist-csf2"
+            ]
+          }
+        },
+        {
+          "id": "allow_workarounds",
+          "label": "Approve the workarounds to keep cash flowing for now",
+          "hint": "Billing is weeks behind.",
+          "csf": "GV",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "legal": 10,
+            "dataLoss": 3
+          },
+          "setFlags": {
+            "shadowIT": true
+          },
+          "next": "n13_lessons",
+          "debrief": {
+            "whyItMatters": "Patient data in personal email and home laptops is a fresh HIPAA exposure, created after the incident.",
+            "betterPractice": "Provide approved interim tools instead of approving unsafe ones.",
+            "referenceIds": [
+              "hhs-breach-notification-rule",
+              "nist-csf2"
+            ]
+          }
+        },
+        {
+          "id": "need_to_know",
+          "label": "Keep it need-to-know; fewer people talking means fewer leaks",
+          "hint": "Lawyers like it quiet.",
+          "csf": "GV",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "trust": -3,
+            "legal": 2
+          },
+          "next": "n13_lessons",
+          "debrief": {
+            "whyItMatters": "Staff learned details from the news and social media, and rumors filled the gap.",
+            "betterPractice": "Tell staff what they need to know to act safely, coordinated with counsel.",
+            "referenceIds": [
+              "nist-sp800-61r3"
+            ]
+          }
+        }
+      ]
+    },
+    "n13_lessons": {
+      "title": "Two weeks later: lessons learned",
+      "clockAdvance": 96,
+      "inbox": [
+        {
+          "from": "Dr. Lena Ortiz, Practice Owner",
+          "channel": "email",
+          "subject": "What now?",
+          "body": "We're seeing patients again. I never want to do this twice. What do we change, and what will it cost?"
+        }
+      ],
+      "narrative": "The crisis is over. What you do now decides whether the next attack is a bad morning or another lost fortnight.",
+      "choices": [
+        {
+          "id": "after_action",
+          "label": "Run a blameless after-action review and fund the fixes: MFA everywhere, an offline or immutable backup, and a tested IR plan with the insurer's call tree",
+          "hint": "Real money in a hard year.",
+          "csf": "GV",
+          "legacyPhase": "Post-Incident Activity",
+          "keyDecision": true,
+          "keyGroup": "lessons",
+          "effects": {
+            "cost": 30000,
+            "trust": 4,
+            "legal": -5
+          },
+          "setFlags": {
+            "lessonsLearned": true
+          },
+          "next": [
+            {
+              "if": {
+                "paid": true
+              },
+              "next": "end_paid"
+            },
+            {
+              "if": {
+                "rebuiltFromScratch": true
+              },
+              "next": "end_rebuild"
+            },
+            {
+              "if": {
+                "claimedNoBreach": true
+              },
+              "next": "end_fallout"
+            },
+            {
+              "if": {
+                "misleadingStatement": true
+              },
+              "next": "end_fallout"
+            },
+            {
+              "else": "end_recovered"
+            }
+          ],
+          "debrief": {
+            "whyItMatters": "Post-incident improvement is where the cost of this incident buys down the next one. Every hidden weakness in this scenario was fixable in advance.",
+            "betterPractice": "Hold a blameless review, track remediation to completion, and feed lessons into Govern, Identify and Protect.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "nist-csf2",
+              "cisa-cpg"
+            ]
+          }
+        },
+        {
+          "id": "memo_only",
+          "label": "Write a short internal memo and move on, because the budget is gone",
+          "hint": "The insurer covered some of it; the rest hurt.",
+          "csf": "GV",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "legal": 4
+          },
+          "next": [
+            {
+              "if": {
+                "paid": true
+              },
+              "next": "end_paid"
+            },
+            {
+              "if": {
+                "rebuiltFromScratch": true
+              },
+              "next": "end_rebuild"
+            },
+            {
+              "if": {
+                "claimedNoBreach": true
+              },
+              "next": "end_fallout"
+            },
+            {
+              "if": {
+                "misleadingStatement": true
+              },
+              "next": "end_fallout"
+            },
+            {
+              "else": "end_recovered"
+            }
+          ],
+          "debrief": {
+            "whyItMatters": "Without funded fixes, the same remote-access weakness and on-network backups are waiting for the next attacker.",
+            "betterPractice": "Prioritize a few high-impact controls (MFA, offline backups, an IR plan) even on a small budget.",
+            "referenceIds": [
+              "cisa-cpg",
+              "nist-sp800-61r3"
+            ]
+          }
+        },
+        {
+          "id": "blame",
+          "label": "Let go of the front-desk lead whose old account was used",
+          "hint": "Someone has to be accountable.",
+          "csf": "GV",
+          "legacyPhase": "Post-Incident Activity",
+          "effects": {
+            "trust": -4,
+            "legal": 5
+          },
+          "next": [
+            {
+              "if": {
+                "paid": true
+              },
+              "next": "end_paid"
+            },
+            {
+              "if": {
+                "rebuiltFromScratch": true
+              },
+              "next": "end_rebuild"
+            },
+            {
+              "if": {
+                "claimedNoBreach": true
+              },
+              "next": "end_fallout"
+            },
+            {
+              "if": {
+                "misleadingStatement": true
+              },
+              "next": "end_fallout"
+            },
+            {
+              "else": "end_recovered"
+            }
+          ],
+          "debrief": {
+            "whyItMatters": "The account was created by IT and never had MFA. That is a systemic failure, and blaming one person teaches everyone to hide mistakes.",
+            "betterPractice": "Run blameless reviews that fix systems, not scapegoats.",
+            "referenceIds": [
+              "nist-sp800-61r3"
+            ]
+          }
+        }
+      ]
+    },
+    "end_recovered": {
+      "title": "Doors open, nothing paid",
+      "clockAdvance": 24,
+      "narrative": "The clinic is open on its own restored systems. Five days of notes were re-entered from paper. Patient letters went out, and the call line is quiet now.",
+      "ending": true,
+      "outcome": "Recovered without paying",
+      "summary": "You recovered from your own backup instead of the attacker's decryptor. How well you did shows in the meters: how fast you contained, whether you found the cloud copy early, and whether you notified on time."
+    },
+    "end_paid": {
+      "title": "Paid, and still exposed",
+      "clockAdvance": 24,
+      "narrative": "The clinic is running, partly on decrypted data and partly on re-entered records. The 'deleted' patient files are circulating anyway.",
+      "ending": true,
+      "outcome": "Paid the ransom",
+      "summary": "Paying bought an unreliable decryptor and a promise that was not kept. The data still leaked, the costs were the highest in the game, and the clinic has to notify patients regardless."
+    },
+    "end_rebuild": {
+      "title": "The long rebuild",
+      "clockAdvance": 24,
+      "narrative": "Weeks of re-entering charts from paper, pharmacies and insurers. Some history is simply gone. The weekly cloud copy turned up in a billing review a month later, intact.",
+      "ending": true,
+      "outcome": "Rebuilt from scratch",
+      "summary": "Never finding the surviving backup turned a bad week into a lost month. The lesson: know where every backup is, and test it before you need it."
+    },
+    "end_fallout": {
+      "title": "The story that wouldn't go away",
+      "clockAdvance": 24,
+      "narrative": "The systems came back. The story didn't go away: patient records on a leak site, a public denial, and now letters from regulators asking for your risk assessment. Outside counsel's bill for the regulatory response is already arriving.",
+      "ending": true,
+      "outcome": "Regulatory and reputational fallout",
+      "summary": "The technical recovery worked, but how you handled notification and communication turned the incident into an enforcement and trust problem that will outlast the outage.",
+      "effects": {
+        "legal": 15,
+        "trust": -6,
+        "cost": 25000
+      }
+    },
+    "n11b_golive": {
+      "title": "Now bring it back",
+      "clockAdvance": 24,
+      "inbox": [
+        {
+          "from": "Dr. Lena Ortiz, Practice Owner",
+          "channel": "text",
+          "body": "Are we finally safe to open?"
+        }
+      ],
+      "narrative": "Credentials are reset and MFA is on. The rebuilt systems are ready for go-live.",
+      "choices": [
+        {
+          "id": "phased_late",
+          "label": "Bring systems back in priority order (EHR and e-prescribing first), each verified clean and monitored",
+          "hint": "Steady and boring, and it may miss Monday.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 18,
+            "cost": 12000
+          },
+          "setFlags": {
+            "recoveryDone": true
+          },
+          "next": "n12_staff",
+          "debrief": {
+            "whyItMatters": "Phased, verified restoration catches problems one system at a time and gets the most critical services, like prescriptions, back first.",
+            "betterPractice": "Restore in priority order, validate each system, and watch closely for signs that the attacker has returned.",
+            "referenceIds": [
+              "nist-sp800-61r3",
+              "cisa-stopransomware-guide"
+            ]
+          }
+        },
+        {
+          "id": "big_bang_late",
+          "label": "Turn everything back on at once Monday morning",
+          "hint": "One big push, and done.",
+          "csf": "RC",
+          "legacyPhase": "Containment, Eradication & Recovery",
+          "effects": {
+            "downtime": 6,
+            "dataLoss": 4,
+            "trust": -3
+          },
+          "setFlags": {
+            "recoveryDone": true,
+            "rushedRecovery": true
+          },
+          "next": "n12_staff",
+          "debrief": {
+            "whyItMatters": "Monday's billing run duplicated claims and two interfaces failed silently. A rushed go-live trades a day of downtime for a week of errors.",
+            "betterPractice": "Stage the go-live and verify integrations before full load.",
+            "referenceIds": [
+              "nist-sp800-61r3"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "injects": [
+    {
+      "id": "spread",
+      "atHour": 1,
+      "if": {
+        "keptOpen": true
+      },
+      "message": {
+        "from": "NAS admin console",
+        "channel": "email",
+        "subject": "ALERT: volume encrypted",
+        "body": "Backup volume 'nightly' and file share 'Billing' are reporting mass file changes. 4 more servers have stopped responding."
+      },
+      "effects": {
+        "dataLoss": 8,
+        "downtime": 6
+      },
+      "setFlags": {
+        "spreadWider": true
+      }
+    },
+    {
+      "id": "reinfection",
+      "atHour": 0,
+      "if": {
+        "restoringClean": true,
+        "resetCredentials": false
+      },
+      "message": {
+        "from": "Marisol, Front Desk",
+        "channel": "text",
+        "body": "The black screen is back on two of the NEW computers. I didn't click anything, I promise!"
+      },
+      "effects": {
+        "downtime": 30,
+        "cost": 40000,
+        "trust": -6,
+        "dataLoss": 4
+      },
+      "setFlags": {
+        "reinfected": true
+      }
+    },
+    {
+      "id": "wider_restore",
+      "atHour": 0,
+      "if": {
+        "spreadWider": true,
+        "restoringClean": true
+      },
+      "message": {
+        "from": "Recovery lead",
+        "channel": "email",
+        "subject": "Restore scope increased",
+        "body": "Because the infection reached six more servers before containment, there are now ten systems to rebuild instead of four. Add about a day."
+      },
+      "effects": {
+        "downtime": 24,
+        "cost": 30000
+      }
+    },
+    {
+      "id": "evidence_gap",
+      "atHour": 0,
+      "if": {
+        "evidenceLost": true,
+        "scoped": true
+      },
+      "message": {
+        "from": "Kestrel Point Incident Response",
+        "channel": "email",
+        "subject": "Evidence gap",
+        "body": "The servers were restarted before imaging, so memory artifacts are gone. We can't fully rule out other tools, and the timeline will take longer to build."
+      },
+      "effects": {
+        "cost": 8000,
+        "legal": 4
+      }
+    },
+    {
+      "id": "leak_threat",
+      "atHour": 24,
+      "if": {
+        "dataExfiltrated": true,
+        "paid": false
+      },
+      "message": {
+        "from": "Quiet Harbor Collective · leak site",
+        "channel": "portal",
+        "subject": "NEW VICTIM: Brazos Valley Family Clinic",
+        "body": "9,000+ patients. Charts. Insurance. SSNs. Publication in 48:00:00. Sample: 20 records attached. Patients: ask your doctor why they won't protect you."
+      },
+      "effects": {
+        "trust": -8,
+        "legal": 8
+      },
+      "setFlags": {
+        "leakPosted": true,
+        "confirmedExfil": true
+      }
+    },
+    {
+      "id": "reporter",
+      "atHour": 26,
+      "if": {
+        "notifiedPublic": false
+      },
+      "message": {
+        "from": "Dana Whitfield, Brazos Courier",
+        "channel": "text",
+        "body": "Hi, Dana from the Courier. Several patients say the clinic is closed and mention a hacking group's website. Can you call me back today?"
+      },
+      "effects": {
+        "trust": -2
+      },
+      "setFlags": {
+        "reporterCalled": true
+      }
+    },
+    {
+      "id": "insurer_late",
+      "atHour": 40,
+      "if": {
+        "calledInsurer": false
+      },
+      "message": {
+        "from": "Paul Reyes, Office Manager",
+        "channel": "email",
+        "subject": "Insurance problem",
+        "body": "I finally got through to the insurer. Because we didn't call the hotline and used our own vendor, they're reserving their rights on coverage for the costs so far. That could be a lot of money we pay ourselves."
+      },
+      "effects": {
+        "cost": 60000,
+        "legal": 4
+      },
+      "setFlags": {
+        "coverageDispute": true
+      }
+    },
+    {
+      "id": "resale",
+      "atHour": 110,
+      "if": {
+        "paid": true,
+        "dataExfiltrated": true
+      },
+      "message": {
+        "from": "Dark-web monitoring alert (via IR firm)",
+        "channel": "portal",
+        "subject": "Listing: 'US clinic patient DB 38GB'",
+        "body": "A listing on a criminal forum is selling a 38 GB 'Texas family clinic' dataset. Sample files match Brazos Valley records. The 'deletion log' was worthless."
+      },
+      "effects": {
+        "trust": -8,
+        "legal": 8
+      },
+      "setFlags": {
+        "leakPosted": true,
+        "confirmedExfil": true
+      }
+    },
+    {
+      "id": "contradiction",
+      "atHour": 0,
+      "if": {
+        "misleadingStatement": true,
+        "leakPosted": true
+      },
+      "message": {
+        "from": "Brazos Courier",
+        "channel": "news",
+        "subject": "Clinic said no patient data was involved. Records posted online say otherwise.",
+        "body": "Patients of Brazos Valley Family Clinic say they found their own records on a criminal leak site, days after the clinic described the incident as a 'technical outage'."
+      },
+      "effects": {
+        "trust": -12,
+        "legal": 8
+      }
+    },
+    {
+      "id": "regulator_letter",
+      "atHour": 150,
+      "if": {
+        "claimedNoBreach": true
+      },
+      "message": {
+        "from": "HHS Office for Civil Rights (fictional letter)",
+        "channel": "email",
+        "subject": "Data request: compliance review",
+        "body": "We have received complaints regarding a cybersecurity incident at your practice. Please provide your breach risk assessment, your Security Rule risk analysis, and copies of any notifications sent."
+      },
+      "effects": {
+        "legal": 10,
+        "cost": 20000
+      }
+    }
+  ],
+  "qa": {
+    "shouldNotDominate": [
+      "paid",
+      "keptOpen",
+      "claimedNoBreach",
+      "misleadingStatement"
+    ]
+  }
+}

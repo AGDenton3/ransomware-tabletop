@@ -92,7 +92,7 @@ export function validateScenario(scn, refs, file = 'scenario') {
   const ids = Object.keys(scn.nodes);
   if (!scn.nodes[scn.start]) err('scenario', `start node "${scn.start}" does not exist`);
   const edges = {};
-  let keyCount = 0;
+  const keyGroups = new Set();
   for (const [nid, n] of Object.entries(scn.nodes)) {
     const where = `node "${nid}"`;
     edges[nid] = [];
@@ -109,7 +109,12 @@ export function validateScenario(scn, refs, file = 'scenario') {
     }
     if (!Array.isArray(n.choices) || n.choices.length === 0) { err(where, 'non-ending node has no choices (dead end)'); continue; }
     if (n.choices.length > MAX_CHOICES) err(where, `has ${n.choices.length} choices; the UI supports at most ${MAX_CHOICES}`);
-    if (!n.choices.some((c) => !c.requires || Object.keys(c.requires).length === 0)) warn(where, 'every choice has "requires"; make sure at least one is always available');
+    if (!n.choices.some((c) => !c.requires || Object.keys(c.requires).length === 0)) {
+      // Fine if two single-flag requires are complementary (e.g. isolated: true / isolated: false).
+      const single = n.choices.map((c) => Object.entries(c.requires || {})).filter((e) => e.length === 1).map((e) => e[0]);
+      const covered = single.some(([k, v]) => v === true && single.some(([k2, v2]) => k2 === k && v2 === false));
+      if (!covered) warn(where, 'every choice has "requires"; make sure at least one is always available');
+    }
     const seen = new Set();
     for (const c of n.choices) {
       const cw = `${where} choice "${c.id}"`;
@@ -123,7 +128,7 @@ export function validateScenario(scn, refs, file = 'scenario') {
       checkEffects(cw, c.effects);
       checkCond(`${cw} requires`, c.requires);
       if (c.keyDecision !== undefined && typeof c.keyDecision !== 'boolean') err(cw, '"keyDecision" must be true or false');
-      if (c.keyDecision) keyCount++;
+      if (c.keyDecision) keyGroups.add(c.keyGroup || `${nid}:${c.id}`);
       if (!isObj(c.debrief)) err(cw, 'missing "debrief"');
       else {
         if (!str(c.debrief.whyItMatters)) err(cw, 'debrief missing "whyItMatters"');
@@ -206,7 +211,7 @@ export function validateScenario(scn, refs, file = 'scenario') {
   const endings = ids.filter((id) => scn.nodes[id].ending).length;
   const decisions = ids.length - endings;
   const verify = (JSON.stringify(scn).match(/\[VERIFY/g) || []).length;
-  return { errors, warnings, stats: { nodes: ids.length, decisions, endings, keyDecisions: keyCount, injects: (scn.injects || []).length, verify } };
+  return { errors, warnings, stats: { nodes: ids.length, decisions, endings, keyDecisions: keyGroups.size, injects: (scn.injects || []).length, verify } };
 }
 
 export function loadJSON(path) {
