@@ -23,7 +23,45 @@
 Tag every decision with a NIST CSF 2.0 Function (GV Govern, ID Identify, PR Protect, DE Detect, RS Respond, RC Recover), per NIST SP 800-61 Rev. 3 (April 2025, https://csrc.nist.gov/pubs/sp/800/61/r3/final), which superseded Rev. 2 (2012). Also give each decision the legacy Rev. 2 phase as a secondary label (Preparation; Detection & Analysis; Containment, Eradication & Recovery; Post-Incident Activity).
 
 ## Design
-Restrained and academic, like the AGGIES Lab BLOCKMINE site: deep maroon accent on warm off-white, graphite for threat elements, a serif display font with italic emphasis, cards, numbered steps. In-game it feels like an incident war room: a clock, a meters dashboard, and "incoming message" cards (CEO email, reporter call, attacker portal mock-up). Serious, not cartoonish, not "hacker green".
+CONCEPT: "Late-night Northgate chicken joint meets incident war room." A hand-painted local College Station restaurant (sign-painter lettering, wall murals, a menu board behind the counter, order tickets, sauce-cup yellow, fryer-paper checks) with a light 1960s space-age (atomic/Googie) accent: starbursts, orbit rings, boomerangs. Never use any real restaurant's name, logo, mascot or wording.
+
+PALETTE (the only colors allowed; CSS custom properties in css/styles.css):
+- --maroon #5C0A14 primary ink, headers, borders
+- --sauce #E8A33D mustard-gold accent
+- --fry #F6D365 crinkle-fry yellow, highlights only
+- --paper #F4EBD9 fryer-paper cream background
+- --ketchup #C8361C danger, alerts, meter increases that hurt
+- --pickle #4F6B3A good outcomes, recovery
+- --chalk #22201C menu-board near-black (game dashboard)
+- --grease #D9C7A3 muted secondary surfaces, rules, dividers
+Translucency only via color-mix() of these. No other hex values.
+
+CONTRAST RULES (measured): chalk/paper 13.73, maroon/paper 11.75, chalk/grease 9.79, maroon/grease 8.38, sauce/chalk 7.54, fry/chalk 11.17, maroon/sauce 6.45, pickle/paper 5.07, ketchup/paper 4.43 (large text or non-text only), ketchup/chalk 3.10 (large or non-text only), pickle/chalk 2.71 (never), sauce/paper 1.82 (never).
+- Body text: chalk or maroon on paper, or paper on chalk/maroon.
+- Text on --fry or --sauce only if it is --chalk and at least 18px bold (or 24px).
+- Ketchup never carries small text; use it for fills, borders, markers, and 24px+ type.
+- Dark mode = "after hours": chalk background, paper text, sauce accents; the menu board turns maroon.
+
+TYPE (self-hosted in assets/fonts with OFL licenses, loaded by @font-face; no CDNs):
+- Shrikhand: display headlines
+- Bungee: labels, nav, buttons, menu-board headers (all caps, letter-spaced)
+- Atkinson Hyperlegible: body text
+- DM Mono: numbers, meters, receipts; DSEG7 Classic: the game clock only
+- Generic fallbacks (sans-serif, monospace, cursive) only; never Inter, Roboto, Arial, Helvetica, system-ui or a serif.
+
+COMPONENTS
+- Dashboard = menu board (chalk): meters as menu items with dot leaders; changes flash like a price being repainted (stepped wipe), not a glow.
+- Clock = scoreboard (DSEG7 digits in fry on chalk).
+- Inbox = order tickets on receipt paper: perforated top edge, monospace header, some rotated 1–2 degrees.
+- Choices = printed stickers: 3px maroon border, flat fill, hard 4px 4px 0 shadow that collapses when pressed.
+- CSF badges = round bottle-cap stickers with the two-letter code (24px so every cap color passes AA-large).
+- Debrief timeline = one itemized receipt "ORDER #477" with a dashed tear line, totals and grade at the bottom, footer "THANK YOU, COME AGAIN… PREPARED".
+- Ransom splash = taped paper notice with a ketchup "SIMULATION" rubber stamp.
+- Hero = hand-painted wall sign: Shrikhand with a hard maroon-on-sauce offset, a starburst behind the key word, inline-SVG noise for plaster texture.
+- Background = paper with faint halftone dots. Icons = hand-drawn inline SVGs written in-house (thick, slightly uneven strokes). No icon libraries, no emoji.
+- Focus = thick sauce outline with a chalk ring. Reduced motion turns off rotations and repaint animations.
+
+AVOID: purple/blue gradients, gradient text, neon hacker looks, glassmorphism/backdrop blur, soft blurred shadows, glowing borders, identical rounded cards in a 3-column grid, centered hero with a tagline pill, pill badges, slate/gray palettes, emoji icons, sparkles, generic icon sets, perfect symmetry everywhere (let tickets rotate and stickers overlap), and stock copy ("Seamless", "Empower", "Unlock", "Dive in"). Write UI copy in a plain, local, slightly wry voice ("Pick your shift", "Read the ticket").
 
 ## Layout
 Pages: `index.html` (landing + scenario picker), `play.html`, `debrief.html`, `learn.html`.

@@ -9,13 +9,15 @@
   <meta property="og:title" content="Play · Ransomware Tabletop">
   <meta property="og:description" content="Make the calls in a ransomware incident, from the first ransom note to lessons learned.">
   <meta property="og:url" content="https://agdenton3.github.io/ransomware-tabletop/play.html">
-  <meta name="theme-color" content="#A10006">
+  <meta name="theme-color" content="#5C0A14">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/Shrikhand-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/fonts/Bungee-Regular.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="css/styles.css">
   <script type="module" src="js/ui/play.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
+  <a class="skip-link" href="#main">Skip to the counter</a>
   <header class="site-header">
     <div class="wrap">
       <a class="brand" href="index.html"><img class="mark" src="assets/favicon.svg" alt=""> Ransomware&nbsp;<em>Tabletop</em></a>
@@ -23,7 +25,7 @@
         <a href="index.html">Home</a>
         <a href="play.html" aria-current="page">Play</a>
         <a href="learn.html">Learn</a>
-        <button class="theme-toggle" type="button">Dark mode</button>
+        <button class="theme-toggle" type="button">After hours</button>
       </nav>
     </div>
   </header>
@@ -31,16 +33,16 @@
   <main id="main">
     <!-- Shown when no scenario is chosen -->
     <section class="wrap section" id="picker-view" hidden aria-labelledby="picker-title">
-      <p class="eyebrow">Play</p>
-      <h1 id="picker-title">Choose a <em>scenario</em></h1>
-      <div class="case-files" id="scenario-list"><p class="muted">Loading scenarios…</p></div>
+      <p class="eyebrow">The counter</p>
+      <h1 id="picker-title">Pick your <em>shift</em></h1>
+      <div class="case-files" id="scenario-list"><p>Warming up the fryer…</p></div>
     </section>
 
     <div id="error" class="wrap section" hidden></div>
 
     <!-- The war room -->
     <div id="game" hidden>
-      <div class="warroom-top" role="region" aria-label="Clock and meters">
+      <div class="warroom-top" role="region" aria-label="Menu board: clock and meters">
         <div class="wrap">
           <div class="top-left">
             <p class="scenario-name" id="scn-name"></p>
@@ -52,7 +54,7 @@
 
       <div class="wrap warroom">
         <section class="inbox-col" aria-labelledby="inbox-title">
-          <h2 class="panel-title" id="inbox-title">Inbox</h2>
+          <h2 class="panel-title" id="inbox-title">Order tickets</h2>
           <div class="inbox" id="inbox"></div>
         </section>
 
@@ -68,19 +70,19 @@
 
         <aside class="side" aria-label="Situation">
           <section class="card board" aria-labelledby="board-title">
-            <h2 class="panel-title" id="board-title">Situation board</h2>
+            <h2 class="panel-title" id="board-title">What we know</h2>
             <dl id="board"></dl>
           </section>
-          <section class="card" aria-label="Organization profile">
+          <section class="card" aria-label="About the organization">
             <details class="org" id="org">
-              <summary>Org profile</summary>
+              <summary>About the place</summary>
               <dl id="org-dl"></dl>
             </details>
           </section>
           <section class="card no-print">
-            <h2 class="panel-title">Controls</h2>
-            <p class="muted" style="font-size:.9rem">Press <kbd>1</kbd>–<kbd>4</kbd> to choose. Progress saves automatically in this browser.</p>
-            <button class="btn btn-ghost" type="button" id="restart">Restart scenario</button>
+            <h2 class="panel-title">House rules</h2>
+            <p style="font-size:.95rem">Press <kbd>1</kbd>–<kbd>4</kbd> to pick. Your place is saved in this browser, so you can walk away and come back.</p>
+            <button class="btn btn-secondary" type="button" id="restart">Start the shift over</button>
           </section>
         </aside>
       </div>
@@ -91,7 +93,8 @@
 
   <dialog class="splash" id="splash" aria-labelledby="note-title" aria-describedby="note-text">
     <div class="note">
-      <span class="sim-label">SIMULATION · FICTIONAL ATTACKER</span>
+      <span class="sim-label">Posted on the front-desk monitor · fictional attacker</span>
+      <span class="stamp" aria-hidden="true">SIMULATION</span>
       <p class="gang" id="note-gang"></p>
       <h2 id="note-title">YOUR FILES ARE ENCRYPTED</h2>
       <p id="note-text"></p>
@@ -105,7 +108,7 @@
   <footer class="site-footer">
     <div class="wrap">
       <p class="credit">Amy Denton · CSCE 477 · Texas A&amp;M · Dr. Kumar</p>
-      <p class="disclaimer"><strong>Disclaimer:</strong> This is an educational simulation, not legal advice. All organizations, people, ransomware groups, domains and phone numbers are fictional, and in-game costs are illustrative. Real laws and guidance are cited to primary sources on the <a href="learn.html#references">Learn page</a>.</p>
+      <p class="disclaimer"><strong>The fine print:</strong> this is an educational simulation, not legal advice. Every organization, person, ransomware crew, domain and phone number here is made up, and the dollar amounts are for teaching, not estimates. The real laws and guidance are cited to primary sources on the <a href="learn.html#references">Learn page</a>.</p>
     </div>
   </footer>
 </body>

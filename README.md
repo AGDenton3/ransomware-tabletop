@@ -67,6 +67,10 @@ node tools/walk-all-paths.mjs --write   # also refresh each scenario's "best run
 4. Add an entry to `data/scenarios/index.json`.
 5. Run `node tools/validate.mjs`, then `node tools/walk-all-paths.mjs <id>`, and adjust the scenario's numbers (not the engine) until no balance problems are reported. Finally run `--write` to store the benchmark.
 
+## Fonts
+
+Self-hosted in `assets/fonts/` under the SIL Open Font License (licence files included): Shrikhand, Bungee, Atkinson Hyperlegible and DM Mono (from the google/fonts repository) and DSEG7 Classic (keshikan/DSEG). No font CDNs.
+
 ## References
 
 Every real-world law, regulation, guidance document or statistic cites a primary source in [`data/references.json`](data/references.json), listed in full on the site's **Learn** page. Key sources: NIST SP 800-61 Rev. 3 (2025), NIST CSF 2.0 (2024), the CISA/FBI/NSA/MS-ISAC #StopRansomware Guide, Treasury OFAC's 2021 ransomware advisory, FBI/IC3 guidance, the HHS Breach Notification Rule and ransomware fact sheet, Texas Business & Commerce Code § 521.053, Texas Government Code § 2054.603, CISA/FBI advisory AA21-131A, and the CISA/FBI/EPA Water and Wastewater Sector Incident Response Guide.

@@ -5,6 +5,7 @@ import { computeResults, scales } from '../engine/score.js';
 import { saveProgress, loadProgress, clearProgress, recordRun, getPref, setPref } from '../engine/save.js';
 import { initTheme, loadScenario, loadReferences, esc, paras, formatMeter, formatDelta, speakDelta, isGood, deltaList, csfBadge, phaseBadge, showError } from './common.js';
 import { renderPicker } from './picker.js';
+import { icon } from './icons.js';
 
 initTheme();
 
@@ -69,8 +70,8 @@ function showSplash(saved) {
 
   const actions = $('note-actions');
   actions.innerHTML = saved
-    ? `<button class="btn" type="button" data-act="resume">Resume where you left off</button><button class="btn btn-ghost" type="button" data-act="new">Start over</button>`
-    : `<button class="btn" type="button" data-act="new">Begin the response</button>`;
+    ? `<button class="btn" type="button" data-act="resume">Pick up where you left off</button><button class="btn btn-secondary" type="button" data-act="new">Start the morning over</button>`
+    : `<button class="btn" type="button" data-act="new">Start the morning</button>`;
 
   const start = (act) => {
     clearInterval(interval);
@@ -92,8 +93,10 @@ function showSplash(saved) {
 function buildMeters() {
   $('meters').innerHTML = METERS.map((k) => `
     <div class="meter" id="meter-${k}">
-      <div class="meter-head"><span class="meter-label"><span class="full">${esc(METER_INFO[k].label)}</span><span class="short" aria-hidden="true">${SHORT[k]}</span></span><span class="meter-value" id="mv-${k}"></span></div>
-      <div class="meter-bar" aria-hidden="true"><div class="meter-fill" id="mf-${k}"></div></div>
+      <span class="tone-dot" aria-hidden="true"></span>
+      <span class="meter-label"><span class="full">${esc(METER_INFO[k].label)}</span><span class="short" aria-hidden="true">${SHORT[k]}</span></span>
+      <span class="leader" aria-hidden="true"></span>
+      <span class="meter-value" id="mv-${k}"></span>
       <span class="meter-delta" id="md-${k}" aria-hidden="true"></span>
     </div>`).join('');
 }
@@ -112,16 +115,17 @@ function updateMeters(deltas) {
     const badness = METER_INFO[k].higherIsBetter ? 1 - frac : frac;
     const el = $(`meter-${k}`);
     el.dataset.tone = badness < 0.34 ? 'good' : badness < 0.67 ? 'warn' : 'bad';
-    $(`mv-${k}`).textContent = formatMeter(k, v);
-    $(`mf-${k}`).style.width = `${Math.max(2, frac * 100)}%`;
+    $(`mv-${k}`).textContent = formatMeter(k, v).replace(' h', ' HRS').replace(' d', ' DAYS');
     el.setAttribute('aria-label', `${METER_INFO[k].label}: ${formatMeter(k, v)}`);
     const d = deltas?.[k];
     const chip = $(`md-${k}`);
     chip.classList.remove('show', 'is-good', 'is-bad');
+    el.classList.remove('repaint');
     if (d) {
       chip.textContent = formatDelta(k, d);
       void chip.offsetWidth; // restart the animation
       chip.classList.add('show', isGood(k, d) ? 'is-good' : 'is-bad');
+      el.classList.add('repaint');
     }
   }
 }
@@ -141,7 +145,8 @@ function render(deltas, first = false) {
   const clockText = formatClock(scenario, state.clock);
   if (lastClockText && clockText !== lastClockText) { const c = $('clock'); c.classList.remove('tick'); void c.offsetWidth; c.classList.add('tick'); }
   lastClockText = clockText;
-  $('clock').textContent = clockText;
+  const [day, hhmm] = clockText.split(' · ');
+  $('clock').innerHTML = `<span class="clock-day">${esc(day)}</span><span class="clock-digits"><span>${esc(hhmm)}</span></span>`;
   $('clock').setAttribute('aria-label', `In-game time: ${formatClock(scenario, state.clock)}`);
   updateMeters(deltas);
   if (!first) feedback(deltas);
@@ -149,7 +154,7 @@ function render(deltas, first = false) {
   renderBoard();
   if (!first) announce(deltas, count);
 
-  $('node-eyebrow').textContent = node.ending ? 'Outcome' : `Decision · ${formatClock(scenario, state.clock)}`;
+  $('node-eyebrow').textContent = node.ending ? 'How it shook out' : `Your call · ${formatClock(scenario, state.clock)}`;
   $('node-title').textContent = node.title;
   $('narrative').innerHTML = paras(node.narrative);
   if (node.ending) renderEnding(node);
@@ -160,20 +165,32 @@ function render(deltas, first = false) {
   if (!first) $('stage-card').scrollIntoView({ block: 'start', behavior: reducedMotion ? 'auto' : 'smooth' });
 }
 
+const CHANNEL = {
+  email: { label: 'EMAIL', icon: 'mail' },
+  phone: { label: 'CALL-IN', icon: 'phone' },
+  text: { label: 'TEXT', icon: 'chat' },
+  news: { label: 'NEWS', icon: 'news' },
+  portal: { label: 'PORTAL', icon: 'portal' },
+};
+
 function renderInbox(node) {
   const time = formatClock(scenario, state.clock).split(' · ')[1];
   const injected = (state.injectMessages || []).map((m) => ({ ...m, isInject: true }));
   const msgs = [...injected, ...(node.inbox || [])];
-  const label = { email: 'EMAIL', phone: 'CALL', text: 'TEXT', news: 'NEWS', portal: 'PORTAL' };
   $('inbox').innerHTML = msgs.length
-    ? msgs.map((m, i) => `
-      <article class="msg msg-${esc(m.channel)} is-new${m.isInject ? ' msg-inject' : ''}" style="animation-delay:${reducedMotion ? 0 : i * 280}ms" aria-label="${esc(label[m.channel])} from ${esc(m.from)}">
-        <div class="msg-head"><span class="msg-channel">${label[m.channel]}</span><span class="msg-from">${esc(m.from)}</span><span class="msg-time">${esc(time)}</span></div>
-        ${m.isInject ? '<p class="msg-tag">NEW DEVELOPMENT</p>' : ''}
-        ${m.subject ? `<p class="msg-subject">${esc(m.subject)}</p>` : ''}
-        <div class="msg-body">${esc(m.body)}</div>
-      </article>`).join('')
-    : '<p class="muted">No new messages.</p>';
+    ? msgs.map((m, i) => {
+      const ch = CHANNEL[m.channel] || CHANNEL.email;
+      return `
+      <div class="msg-wrap">
+        <article class="ticket msg msg-${esc(m.channel)} is-new${m.isInject ? ' msg-inject' : ''}" style="animation-delay:${reducedMotion ? 0 : i * 260}ms" aria-label="${esc(ch.label)} from ${esc(m.from)}">
+          ${m.isInject ? '<p class="msg-tag">Just came in</p>' : ''}
+          <p class="msg-head">${icon(ch.icon)}<span class="msg-channel">${ch.label}</span><span class="msg-from">${esc(m.from)}</span><span class="msg-time">${esc(time)}</span></p>
+          ${m.subject ? `<p class="msg-subject">${esc(m.subject)}</p>` : ''}
+          <div class="msg-body">${esc(m.body)}</div>
+        </article>
+      </div>`;
+    }).join('')
+    : '<p>No new tickets.</p>';
   return msgs.length;
 }
 
@@ -238,8 +255,8 @@ function renderEnding(node) {
       <p>${esc(node.summary)}</p>
     </div>
     <div class="btn-row result-actions">
-      <a class="btn" href="debrief.html?run=${encodeURIComponent(runId)}">See your debrief</a>
-      <a class="btn btn-ghost" href="play.html?scenario=${encodeURIComponent(scenario.id)}${PRESENT ? '&present=1' : ''}">Play again</a>
+      <a class="btn" href="debrief.html?run=${encodeURIComponent(runId)}">Get your receipt</a>
+      <a class="btn btn-secondary" href="play.html?scenario=${encodeURIComponent(scenario.id)}${PRESENT ? '&present=1' : ''}">Run it back</a>
     </div>`;
 }
 
@@ -268,12 +285,11 @@ function pick(choiceId) {
 function feedback(deltas) {
   if (!deltas) return;
   const hurt = METERS.filter((k) => deltas[k] && !isGood(k, deltas[k]));
-  hurt.forEach((k) => { const m = $(`meter-${k}`); m.classList.remove('hit'); void m.offsetWidth; m.classList.add('hit'); });
   const severe = (deltas.cost || 0) >= 30000 || (deltas.downtime || 0) >= 24 || (deltas.dataLoss || 0) >= 8 || (deltas.trust || 0) <= -6 || (deltas.legal || 0) >= 8;
   if (severe && !reducedMotion) {
     document.body.classList.remove('jolt'); void document.body.offsetWidth;
     document.body.classList.add('jolt');
-    setTimeout(() => document.body.classList.remove('jolt'), 900);
+    setTimeout(() => document.body.classList.remove('jolt'), 500);
   }
 }
 
@@ -291,8 +307,8 @@ function onKey(e) {
 function presentBar() {
   return `<div class="present-bar no-print">
     <span class="timer" id="timer" role="timer" aria-label="Vote timer">${timerOn ? `${TIMER_SECONDS}s` : '—'}</span>
-    <button class="btn btn-ghost" type="button" id="timer-toggle" aria-pressed="${timerOn}">Timer ${timerOn ? 'on' : 'off'}</button>
-    <span class="muted">Class votes by show of hands, then press <kbd>A</kbd>–<kbd>D</kbd>.</span>
+    <button class="btn btn-secondary" type="button" id="timer-toggle" aria-pressed="${timerOn}">Timer ${timerOn ? 'on' : 'off'}</button>
+    <span>Hands up for your pick, then press <kbd>A</kbd>–<kbd>D</kbd>.</span>
   </div>`;
 }
 
@@ -330,7 +346,7 @@ function presentPick(choiceId) {
     b.disabled = !on;
   });
   const bar = document.querySelector('.present-bar');
-  bar.innerHTML = `<span><strong>The room chose ${KEYS[idx]}.</strong></span><button class="btn" type="button" id="reveal-btn">Reveal consequences</button>`;
+  bar.innerHTML = `<span><strong>The room picked ${KEYS[idx]}.</strong></span><button class="btn" type="button" id="reveal-btn">Show what it cost</button>`;
   $('reveal-btn').addEventListener('click', () => reveal(choice));
   $('reveal-btn').focus();
 }
@@ -345,12 +361,12 @@ function reveal(choice) {
   const bar = document.querySelector('.present-bar');
   bar.outerHTML = `
     <div class="reveal callout" role="region" aria-label="Consequences">
-      <p class="callout-title">Consequences</p>
+      <p class="callout-title">What it cost</p>
       ${deltaList(deltas)}
       <p>${esc(choice.debrief.whyItMatters)}</p>
       <p class="badges">${csfBadge(choice.csf)} ${phaseBadge(choice.legacyPhase)}</p>
       ${events ? `<p><strong>${events} new development${events > 1 ? 's' : ''}</strong> in the inbox.</p>` : ''}
-      <button class="btn" type="button" id="continue-btn">Continue</button>
+      <button class="btn" type="button" id="continue-btn">Next ticket</button>
     </div>`;
   $('continue-btn').addEventListener('click', () => { pending = null; render(null); });
   $('continue-btn').focus();
@@ -358,7 +374,7 @@ function reveal(choice) {
 
 // ---------------------------------------------------------------- restart / debug
 function restart() {
-  if (!confirm('Restart this scenario? Your current progress will be lost.')) return;
+  if (!confirm('Start this shift over? Your current progress will be lost.')) return;
   clearProgress(scenario.id);
   state = createState(scenario);
   runId = null;

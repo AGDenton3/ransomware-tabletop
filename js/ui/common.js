@@ -69,15 +69,15 @@ export const isGood = (key, d) => (METER_INFO[key].higherIsBetter ? d > 0 : d < 
 
 export function deltaList(deltas) {
   const items = Object.entries(deltas || {}).filter(([, d]) => d);
-  if (!items.length) return '<p class="muted note-block">No meter change.</p>';
+  if (!items.length) return '<p class="note-block">No change on the board.</p>';
   return `<ul class="deltas" aria-label="Meter changes">${items
-    .map(([k, d]) => `<li class="${isGood(k, d) ? 'is-good' : 'is-bad'}">${esc(METER_INFO[k].label)} ${esc(formatDelta(k, d))}</li>`)
+    .map(([k, d]) => `<li class="${isGood(k, d) ? 'is-good' : 'is-bad'}"><span>${esc(METER_INFO[k].label)}</span><span class="dots" aria-hidden="true"></span><span class="val">${esc(formatDelta(k, d))}</span></li>`)
     .join('')}</ul>`;
 }
 
 export function csfBadge(code) {
   const f = CSF_FUNCTIONS[code];
-  return `<span class="badge badge-${esc(code)}" title="NIST CSF 2.0: ${esc(f?.name)}"><span class="code">${esc(code)}</span> ${esc(f?.name)}</span>`;
+  return `<span class="badge badge-${esc(code)}" title="NIST CSF 2.0: ${esc(f?.name)}"><span class="code" aria-hidden="true">${esc(code)}</span><span class="name"><span class="sr-only">${esc(code)} </span>${esc(f?.name)}</span></span>`;
 }
 
 export function phaseBadge(phase) {
@@ -108,7 +108,7 @@ export function initTheme() {
   const current = () => root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   const label = () => {
     const next = current() === 'dark' ? 'light' : 'dark';
-    btn.textContent = next === 'dark' ? 'Dark mode' : 'Light mode';
+    btn.textContent = next === 'dark' ? 'After hours' : 'Daytime';
     btn.setAttribute('aria-label', `Switch to ${next} mode`);
   };
   label();
@@ -122,5 +122,5 @@ export function initTheme() {
 
 /** Show a readable error in a container. */
 export function showError(el, message) {
-  el.innerHTML = `<div class="card callout" role="alert"><p class="callout-title">Something went wrong</p><p>${esc(message)}</p><p><a href="index.html">Back to the scenario list</a></p></div>`;
+  el.innerHTML = `<div class="card callout" role="alert"><p class="callout-title">Kitchen's having a moment</p><p>${esc(message)}</p><p><a href="index.html">Back to the front counter</a></p></div>`;
 }

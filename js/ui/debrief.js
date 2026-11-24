@@ -12,9 +12,9 @@ const runId = new URLSearchParams(location.search).get('run');
 async function boot() {
   const run = getRun(runId);
   if (!run) {
-    root.innerHTML = `<h1 tabindex="-1">No finished run <em>yet</em></h1>
-      <p class="lede">Play a scenario to the end and your debrief will appear here. Runs are stored only in this browser.</p>
-      <p><a class="btn" href="index.html#scenarios">Choose a scenario</a></p>`;
+    root.innerHTML = `<h1 tabindex="-1">No receipt <em>yet</em></h1>
+      <p class="lede">Finish a shift and your receipt prints here. Runs are kept only in this browser.</p>
+      <p><a class="btn" href="index.html#scenarios">Pick your shift</a></p>`;
     return;
   }
   let scenario, refs;
@@ -31,7 +31,7 @@ async function boot() {
   root.innerHTML = [
     header(scenario, results, state),
     compare(scenario, results),
-    timeline(scenario, state, refs),
+    timeline(scenario, state, refs, results),
     csfSection(results),
     missed(scenario, results, refs),
     preparation(scenario),
@@ -45,17 +45,17 @@ async function boot() {
 
 // 1. outcome header -------------------------------------------------------------
 function header(scenario, r, state) {
-  const e = r.ending || { outcome: 'Unfinished run', summary: '' };
+  const e = r.ending || { outcome: 'Unfinished shift', summary: '' };
   return `
   <section class="outcome-card" aria-labelledby="outcome-title">
     <div class="outcome-head">
       <div>
-        <p class="eyebrow">Debrief · ${esc(scenario.title)}</p>
+        <p class="eyebrow">Last call · ${esc(scenario.title)}</p>
         <h1 id="outcome-title" tabindex="-1">${esc(e.outcome)}</h1>
         <p class="lede">${esc(e.summary)}</p>
-        <p class="muted">${r.decisions} decisions · finished ${esc(formatClock(scenario, state.clock))}</p>
+        <p>${r.decisions} calls made · lights off ${esc(formatClock(scenario, state.clock))}</p>
       </div>
-      <div class="grade" aria-label="Grade ${esc(r.grade)}, score ${r.total} out of 100">${esc(r.grade)}<small>${r.total.toFixed(1)} / 100</small></div>
+      <div class="grade" role="img" aria-label="Grade ${esc(r.grade)}, score ${r.total} out of 100"><span aria-hidden="true">${esc(r.grade)}</span><small aria-hidden="true">${r.total.toFixed(1)}/100</small></div>
     </div>
   </section>`;
 }
@@ -71,70 +71,92 @@ function compare(scenario, r) {
     if (best !== undefined) {
       const diff = you - best;
       const better = METER_INFO[k].higherIsBetter ? diff > 0 : diff < 0;
-      verdict = diff === 0 ? '<span class="muted">Matched</span>' : `<span class="${better ? 'better' : 'worse'}">${better ? 'Better' : 'Worse'}</span>`;
+      verdict = diff === 0 ? '<span>Even</span>' : `<span class="${better ? 'better' : 'worse'}">${better ? 'Better' : 'Worse'}</span>`;
     }
     return `<tr><th scope="row">${esc(METER_INFO[k].label)}</th><td class="num">${esc(formatMeter(k, you))}</td><td class="num">${best !== undefined ? esc(formatMeter(k, best)) : '—'}</td><td>${verdict}</td><td class="num">${Math.round(sub[k])}</td><td class="num">${WEIGHTS[k]}%</td></tr>`;
   }).join('');
   const bands = GRADE_BANDS.filter((b) => b.grade !== 'F').map((b) => `${b.grade} ≥ ${b.min}`).join(' · ');
   return `
   <section class="section" aria-labelledby="meters-title">
-    <div class="section-head"><h2 id="meters-title">You vs. the <em>best run</em></h2></div>
-    <p class="muted">“Best run” is the highest-scoring of every possible path through this scenario (${esc(bench?.outcome || 'n/a')}, grade ${esc(bench?.grade || '—')}), found by playing every path automatically.</p>
-    <div class="table-scroll card">
+    <div class="section-head"><h2 id="meters-title">You vs. the <em>house best</em></h2></div>
+    <p>The house best is the highest-scoring of every possible path through this shift (${esc(bench?.outcome || 'n/a')}, grade ${esc(bench?.grade || '—')}), found by playing every path automatically.</p>
+    <div class="table-scroll menu-board">
       <table class="data">
-        <thead><tr><th scope="col">Meter</th><th scope="col" class="num">You</th><th scope="col" class="num">Best run</th><th scope="col">Compared</th><th scope="col" class="num">Subscore</th><th scope="col" class="num">Weight</th></tr></thead>
+        <thead><tr><th scope="col">Meter</th><th scope="col" class="num">You</th><th scope="col" class="num">House best</th><th scope="col">Compared</th><th scope="col" class="num">Subscore</th><th scope="col" class="num">Weight</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
-    <p class="muted" style="margin-top:.75rem">How the grade works: each meter becomes a 0–100 subscore (cost and downtime against this scenario's worst case of ${esc(formatMeter('cost', scenario.scoring?.costBad ?? 1e6))} and ${esc(formatMeter('downtime', scenario.scoring?.downtimeBad ?? 336))}; trust as is; data loss and legal exposure inverted), then they are combined with the weights shown. Grades: ${bands} · F below.</p>
+    <p style="margin-top:1.2rem">How the grade works: each meter becomes a 0–100 subscore (cost and downtime against this scenario's worst case of ${esc(formatMeter('cost', scenario.scoring?.costBad ?? 1e6))} and ${esc(formatMeter('downtime', scenario.scoring?.downtimeBad ?? 336))}; trust as is; data loss and legal exposure inverted), then they are combined with the weights shown. Grades: ${bands} · F below.</p>
   </section>`;
 }
 
-// 2. decision timeline ------------------------------------------------------------
-function timeline(scenario, state, refs) {
+// 2. decision timeline: one long itemized receipt -----------------------------------
+function timeline(scenario, state, refs, r) {
   const items = state.history.map((e) => {
-    const time = esc(formatClock(scenario, e.clock));
+    const time = esc(formatClock(scenario, e.clock).replace('Day ', 'D').replace(' · ', ' '));
     if (e.type === 'choice') {
       const node = scenario.nodes[e.nodeId];
       const c = node.choices.find((x) => x.id === e.choiceId);
       if (!c) return '';
       const d = c.debrief;
       return `<li>
-        <p class="timeline-time">${time} · ${esc(node.title)}</p>
-        <p class="timeline-title">${esc(c.label)}</p>
-        <p class="badges">${csfBadge(c.csf)} ${phaseBadge(c.legacyPhase)}${c.keyDecision ? ' <span class="badge badge-key">Key decision</span>' : ''}</p>
-        ${deltaList(e.deltas)}
-        <p class="note-block"><strong>Why it matters:</strong> ${esc(d.whyItMatters)}</p>
-        <p class="note-block"><strong>Better practice:</strong> ${esc(d.betterPractice)}</p>
-        ${d.realWorld ? `<p class="note-block"><strong>Real-world parallel:</strong> ${esc(d.realWorld)}</p>` : ''}
-        <p class="refs-inline muted">Sources: ${citeLinks(d.referenceIds, refs)}</p>
+        <div class="line-item">
+          <span class="timeline-time">${time}</span>
+          <p class="timeline-title">${esc(c.label)}</p>
+          ${csfBadge(c.csf)}
+          <div class="line-body">
+            <p class="badges">${phaseBadge(c.legacyPhase)}${c.keyDecision ? ' <span class="badge-key">Key call</span>' : ''}</p>
+            ${deltaList(e.deltas)}
+            <p class="note-block"><strong>Why it matters</strong> ${esc(d.whyItMatters)}</p>
+            <p class="note-block"><strong>Better practice</strong> ${esc(d.betterPractice)}</p>
+            ${d.realWorld ? `<p class="note-block"><strong>Real-world parallel</strong> ${esc(d.realWorld)}</p>` : ''}
+            <p class="refs-inline">Sources: ${citeLinks(d.referenceIds, refs)}</p>
+          </div>
+        </div>
       </li>`;
     }
-    if (e.type === 'inject') {
-      const inj = (scenario.injects || []).find((i) => i.id === e.injectId);
+    if (e.type === 'inject' || e.type === 'node') {
+      const inj = e.type === 'inject' ? (scenario.injects || []).find((i) => i.id === e.injectId) : null;
       const m = inj?.message || {};
+      const title = inj ? (m.subject || m.from) : scenario.nodes[e.nodeId].title;
       return `<li class="is-event">
-        <p class="timeline-time">${time} · Development</p>
-        <p class="timeline-title">${esc(m.subject || `${m.from}`)}</p>
-        <p class="muted note-block">${esc(m.from)}: ${esc(m.body)}</p>
-        ${deltaList(e.deltas)}
-      </li>`;
-    }
-    if (e.type === 'node') {
-      const node = scenario.nodes[e.nodeId];
-      return `<li class="is-event">
-        <p class="timeline-time">${time} · Consequence</p>
-        <p class="timeline-title">${esc(node.title)}</p>
-        ${deltaList(e.deltas)}
+        <div class="line-item">
+          <span class="timeline-time">${time}</span>
+          <p class="timeline-title">${esc(title)}</p>
+          <span></span>
+          <div class="line-body">
+            ${inj ? `<p class="note-block">${esc(m.from)}: ${esc(m.body)}</p>` : ''}
+            ${deltaList(e.deltas)}
+          </div>
+        </div>
       </li>`;
     }
     return '';
   }).join('');
+  const dots = '<span class="dots" aria-hidden="true"></span>';
+  const totals = METERS.map((k) => `<div><span>${esc(METER_INFO[k].label)}</span>${dots}<span>${esc(formatMeter(k, r.meters[k]))}</span></div>`).join('');
   return `
   <section class="section" aria-labelledby="timeline-title">
-    <div class="section-head"><h2 id="timeline-title">Decision <em>timeline</em></h2><span class="count" aria-hidden="true">${String(state.history.filter((e) => e.type === 'choice').length).padStart(2, '0')}</span></div>
-    <p class="muted">Each decision with its time, NIST CSF 2.0 Function, legacy SP 800-61 Rev. 2 phase, and meter changes. Filled markers are events you didn't choose.</p>
-    <ol class="timeline">${items}</ol>
+    <div class="section-head"><h2 id="timeline-title">The <em>receipt</em></h2></div>
+    <p style="max-width:46rem;margin:0 auto 1.6rem">Every call you made, rung up in order: the time, the NIST CSF 2.0 Function on the bottle cap, the old SP 800-61 Rev. 2 phase, and what it did to the board. Shaded lines are kitchen notes: things that happened to you.</p>
+    <div class="receipt-wrap">
+      <div class="ticket receipt">
+        <div class="receipt-header">
+          <p class="order">Order #477</p>
+          <p>${esc(scenario.orgProfile.name)}</p>
+          <p>Server: you · ${r.decisions} items</p>
+        </div>
+        <ol class="timeline">${items}</ol>
+        <p class="tear" aria-hidden="true">- - - - tear here - - - -</p>
+        <div class="totals">
+          ${totals}
+          <div><span>Subtotal (score)</span>${dots}<span>${r.total.toFixed(1)} / 100</span></div>
+          <div class="grand"><span>Total</span>${dots}<span class="grade-mark" aria-label="Grade ${esc(r.grade)}">${esc(r.grade)}</span></div>
+        </div>
+        <p class="thanks">Thank you, come again… prepared</p>
+        <p>No refunds on downtime.</p>
+      </div>
+    </div>
   </section>`;
 }
 
@@ -149,17 +171,17 @@ function csfSection(r) {
     const y = 5 + i * rowH;
     return `<g>
       <text x="0" y="${y + 21}" font-size="14" font-weight="600">${c} · ${esc(CSF_FUNCTIONS[c].name)}</text>
-      <rect x="${labelW}" y="${y + 6}" width="${barW}" height="20" rx="4" fill="var(--surface-2)"/>
-      <rect x="${labelW}" y="${y + 6}" width="${Math.max(n ? 4 : 0, w)}" height="20" rx="4" fill="var(--${c.toLowerCase()}-fg)"/>
+      <rect x="${labelW}" y="${y + 6}" width="${barW}" height="20" fill="var(--grease)"/>
+      <rect x="${labelW}" y="${y + 6}" width="${Math.max(n ? 4 : 0, w)}" height="20" fill="var(--cap-${c})" stroke="var(--chalk)" stroke-width="2"/>
       <text x="${labelW + Math.max(w, 0) + 8}" y="${y + 21}" font-size="14" font-weight="700">${n}</text>
     </g>`;
   }).join('');
   const table = codes.map((c) => `<tr><th scope="row">${c} ${esc(CSF_FUNCTIONS[c].name)}</th><td class="num">${r.csfCounts[c]}</td></tr>`).join('');
   return `
   <section class="section" aria-labelledby="csf-title">
-    <div class="section-head"><h2 id="csf-title">Your response by <em>NIST function</em></h2></div>
+    <div class="section-head"><h2 id="csf-title">Your calls by <em>NIST function</em></h2></div>
     <div class="grid grid-2">
-      <div class="card">
+      <div class="card tilt-l">
         <svg class="csf-chart" viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="csf-svg-title">
           <title id="csf-svg-title">Number of your decisions in each CSF 2.0 Function</title>
           ${bars}
@@ -170,7 +192,7 @@ function csfSection(r) {
         ${codes.map((c) => `<p>${csfBadge(c)} ${esc(CSF_FUNCTIONS[c].blurb)}</p>`).join('')}
       </div>
     </div>
-    <p class="muted" style="margin-top:1rem">During an incident most decisions are Respond and Recover. Govern, Identify and Protect are mostly about the preparation that decides how hard those calls are. <a href="learn.html#nist">How SP 800-61 Rev. 3 uses the six Functions</a>.</p>
+    <p style="margin-top:1.4rem">During an incident most decisions are Respond and Recover. Govern, Identify and Protect are mostly about the preparation that decides how hard those calls are. <a href="learn.html#nist">How SP 800-61 Rev. 3 uses the six Functions</a>.</p>
   </section>`;
 }
 
@@ -178,20 +200,20 @@ function csfSection(r) {
 function missed(scenario, r, refs) {
   if (!r.missed.length) {
     return `<section class="section" aria-labelledby="missed-title"><div class="section-head"><h2 id="missed-title">Missed <em>opportunities</em></h2><span class="count" aria-hidden="true">00</span></div>
-      <div class="callout"><p>You took every key decision that was offered to you. Well run.</p></div></section>`;
+      <div class="callout"><p>You made every key call that was put in front of you. Clean shift.</p></div></section>`;
   }
   return `
   <section class="section" aria-labelledby="missed-title">
     <div class="section-head"><h2 id="missed-title">Missed <em>opportunities</em></h2><span class="count" aria-hidden="true">${String(r.missed.length).padStart(2, '0')}</span></div>
-    <p class="muted">Key decisions that were on the table but that you didn't take.</p>
-    <div class="grid">
+    <p>Key calls that were on the table and got left there.</p>
+    <div class="grid grid-2">
       ${r.missed.map((m) => `
-        <article class="card">
+        <article class="sticky">
           <p class="timeline-time">${esc(formatClock(scenario, m.clock))} · ${esc(scenario.nodes[m.nodeId].title)}</p>
           <h3>${esc(m.choice.label)}</h3>
           <p class="badges">${csfBadge(m.choice.csf)} ${phaseBadge(m.choice.legacyPhase)}</p>
           <p>${esc(m.choice.debrief.betterPractice)}</p>
-          <p class="refs-inline muted">Sources: ${citeLinks(m.choice.debrief.referenceIds, refs)}</p>
+          <p class="refs-inline">Sources: ${citeLinks(m.choice.debrief.referenceIds, refs)}</p>
         </article>`).join('')}
     </div>
   </section>`;
@@ -203,8 +225,8 @@ function preparation(scenario) {
   if (!facts.length) return '';
   return `
   <section class="section" aria-labelledby="prep-title">
-    <div class="section-head"><h2 id="prep-title">Preparation would have <em>changed this</em></h2></div>
-    <p class="muted">What was true all along, and the pre-incident measure that would have defused it.</p>
+    <div class="section-head"><h2 id="prep-title">What a little prep <em>would've saved</em></h2></div>
+    <p>What was true the whole time, and the fix that would have taken the sting out of it.</p>
     <div class="grid grid-2">
       ${facts.map((f) => `
         <article class="card">
@@ -222,10 +244,10 @@ function actions(scenario) {
   return `
   <section class="section no-print" aria-label="What next">
     <div class="btn-row">
-      <a class="btn" href="play.html?scenario=${encodeURIComponent(scenario.id)}">Replay this scenario</a>
-      <a class="btn btn-secondary" href="index.html#scenarios">Try another scenario</a>
-      <button class="btn btn-ghost" type="button" id="export-btn">Export run (JSON)</button>
-      <button class="btn btn-ghost" type="button" id="print-btn">Print</button>
+      <a class="btn" href="play.html?scenario=${encodeURIComponent(scenario.id)}">Run it back</a>
+      <a class="btn btn-secondary" href="index.html#scenarios">Pick another shift</a>
+      <button class="btn btn-secondary" type="button" id="export-btn">Save the receipt (JSON)</button>
+      <button class="btn btn-secondary" type="button" id="print-btn">Print it</button>
     </div>
   </section>`;
 }

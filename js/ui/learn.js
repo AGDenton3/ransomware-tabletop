@@ -44,12 +44,12 @@ function renderChecklist(refs) {
     <li>
       <input type="checkbox" id="chk-${item.id}" data-id="${item.id}"${saved[item.id] ? ' checked' : ''}>
       <label for="chk-${item.id}">${csfBadge(item.csf)} <span class="item-text">${esc(item.text)}</span>
-        <span class="refs-inline muted">[${item.refs.filter((r) => refs[r]).map((r) => `<a href="#ref-${r}">${esc(refs[r].publisher.split(/[,(]/)[0].trim())}</a>`).join('; ')}]</span>
+        <span class="refs-inline">[${item.refs.filter((r) => refs[r]).map((r) => `<a href="#ref-${r}">${esc(refs[r].publisher.split(/[,(]/)[0].trim())}</a>`).join('; ')}]</span>
       </label>
     </li>`).join('');
   const progress = () => {
     const done = el.querySelectorAll('input:checked').length;
-    document.getElementById('check-count').textContent = `${done} / ${CHECKLIST.length} ready`;
+    document.getElementById('check-count').textContent = `${done} of ${CHECKLIST.length} in the basket`;
     document.getElementById('check-fill').style.width = `${(done / CHECKLIST.length) * 100}%`;
   };
   progress();

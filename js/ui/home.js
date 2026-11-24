@@ -10,24 +10,11 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = (id) => document.getElementById(id);
 const pad = (n) => String(n).padStart(2, '0');
 
-// Duplicate the ticker items so the loop is seamless.
+// Duplicate the ticker items so the loop never shows a gap.
 const ticker = $('ticker');
 if (ticker) ticker.innerHTML += ticker.innerHTML;
 
-// Scramble the redacted word, then settle on "encrypted".
-const scramble = $('scramble');
-if (scramble && !reduce) {
-  const target = scramble.textContent;
-  const glyphs = '#%&$@*0123456789ABCDEF';
-  let frame = 0;
-  const id = setInterval(() => {
-    frame++;
-    scramble.textContent = [...target].map((ch, i) => (i < frame / 3 ? ch : glyphs[Math.floor(Math.random() * glyphs.length)])).join('');
-    if (frame / 3 >= target.length) { clearInterval(id); scramble.textContent = target; }
-  }, 45);
-}
-
-// Live clock from 07:42:00 and a ransom countdown.
+// Scoreboard clock from 07:42:00 and a ransom countdown.
 let seconds = 0;
 let files = 1218;
 function tick() {
