@@ -1289,10 +1289,11 @@
           "debrief": {
             "whyItMatters": "Paying after legal review reduces sanctions exposure but does not change what you are buying: an unreliable decryptor and a criminal's promise to delete data.",
             "betterPractice": "Make payment a governance decision with counsel, the insurer and law enforcement involved, and plan as if the data will leak anyway.",
-            "realWorld": "In 2024, the ransomware attack on Change Healthcare disrupted claims processing nationwide. HHS OCR opened an investigation into the breach of protected health information.",
+            "realWorld": "In 2024, attackers entered Change Healthcare through a remote-access portal without MFA, the same weakness as in this scenario. UnitedHealth Group's CEO told the Senate Finance Committee the company paid a $22 million ransom, and HHS OCR opened an investigation into the breach.",
             "referenceIds": [
               "ofac-ransomware-advisory-2021",
               "fbi-ic3-ransomware",
+              "senate-finance-change-healthcare-2024",
               "hhs-change-healthcare-faq"
             ]
           }

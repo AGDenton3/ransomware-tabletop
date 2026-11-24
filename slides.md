@@ -13,8 +13,8 @@ Live: https://agdenton3.github.io/ransomware-tabletop/
 |---|---|
 | **Who gets hit** | Clinics, small utilities, cities: no security team, IT is one or two people |
 | **What's at stake** | Patient care, safe water, residents' data, public money |
-| **The scale** | Ransomware was the most-reported threat among critical-infrastructure complainants to the FBI in 2024: about 1,400 complaints, up 9% [FBI IC3 2024]* |
-| **The trend** | Ransomware reports to the FBI rose 21%, and losses 225%, from 2019 to 2020 [OFAC 2021]* |
+| **The scale** | Ransomware was the most-reported threat among critical-infrastructure complainants to the FBI in 2024: 1,403 complaints [FBI IC3 2024] |
+| **The trend** | Ransomware reports to the FBI rose 21%, and losses 225%, from 2019 to 2020 [OFAC 2021] |
 
 **The first hours decide the outcome, and nobody has practised them.**
 
@@ -22,8 +22,6 @@ Live: https://agdenton3.github.io/ransomware-tabletop/
 - The hard part of a ransomware incident isn't technical. It's a chain of decisions under time pressure: contain or keep operating, who to call, whether to pay, what to tell the public.
 - Large companies rehearse these decisions; a 40-person clinic or a 30,000-resident water utility usually doesn't.
 - Rehearsing decisions in a safe setting is the cheapest preparation there is, and that's what this project builds.
-
-\* *Before presenting: confirm both figures in the original documents (`data/references.json` marks the IC3 figure [VERIFY]; the OFAC figure comes from the 2021 advisory's background section).*
 
 ---
 

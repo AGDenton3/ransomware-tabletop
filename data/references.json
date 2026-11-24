@@ -53,7 +53,7 @@
     "publisher": "Federal Bureau of Investigation, Internet Crime Complaint Center (IC3)",
     "year": 2025,
     "url": "https://www.ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf",
-    "note": "Press summaries report ransomware as the most-reported threat among critical-infrastructure complainants (about 1,400 complaints, up 9% from 2023). [VERIFY: confirm exact figures against the PDF before quoting on a slide.]"
+    "note": "Ransomware was the most-reported threat among critical-infrastructure complainants in 2024 (1,403 complaints). Total ransomware complaints: 3,156, up from 2,825 in 2023."
   },
   "hhs-breach-notification-rule": {
     "title": "Breach Notification Rule",
@@ -81,7 +81,7 @@
     "publisher": "HHS Office for Civil Rights (OCR)",
     "year": 2024,
     "url": "https://www.hhs.gov/hipaa/for-professionals/special-topics/change-healthcare-cybersecurity-incident-frequently-asked-questions/index.html",
-    "note": "A real-world parallel: OCR investigated the February 2024 ransomware attack on Change Healthcare, which disrupted claims and pharmacy processing nationwide. [VERIFY: press reports say a ransom was paid and the stolen data was still used for a second extortion attempt; confirm in a primary source such as congressional testimony before citing.]"
+    "note": "A real-world parallel: OCR investigated the February 2024 ransomware attack on Change Healthcare, which disrupted claims and pharmacy processing nationwide."
   },
   "tx-bcc-521-053": {
     "title": "Texas Business & Commerce Code § 521.053: Notification Required Following Breach of Security of Computerized Data",
@@ -109,7 +109,7 @@
     "publisher": "CISA, EPA, DOE, FBI",
     "year": 2025,
     "url": "https://www.cisa.gov/resources-tools/resources/primary-mitigations-reduce-cyber-threats-operational-technology",
-    "note": "Includes removing OT connections to the public internet, segmenting IT and OT, and practising the ability to revert to manual operations. [VERIFY: publication date]"
+    "note": "May 6, 2025 fact sheet (CISA, FBI, EPA, DOE). Includes removing OT connections to the public internet, segmenting IT and OT, and practising the ability to operate OT manually."
   },
   "wws-ir-guide": {
     "title": "Water and Wastewater Sector Incident Response Guide",
@@ -138,5 +138,12 @@
     "year": 2019,
     "url": "https://www.ic3.gov/media/2019/191002.aspx",
     "note": "The FBI does not support paying a ransom, but recognizes that executives facing inoperability will evaluate all options. It urges victims to report regardless of whether they pay."
+  },
+  "senate-finance-change-healthcare-2024": {
+    "title": "Hacking America's Health Care: Assessing the Change Healthcare Cyber Attack and What's Next (hearing)",
+    "publisher": "U.S. Senate Committee on Finance",
+    "year": 2024,
+    "url": "https://www.finance.senate.gov/hearings/hacking-americas-health-care-assessing-the-change-healthcare-cyber-attack-and-whats-next",
+    "note": "May 1, 2024. UnitedHealth Group's CEO testified that attackers used stolen credentials on a remote-access portal without MFA, and that the company paid a $22 million ransom."
   }
 }
